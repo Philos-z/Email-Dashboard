@@ -54,13 +54,13 @@ def test_secret_stays_private_and_blank_preserves_key(client):
 
 
 @pytest.mark.parametrize('url', [
-    'https://192.168.1.20/v1', 'http://127.0.0.1.evil.example/v1',
+    'http://192.169.1.20/v1', 'http://127.0.0.1.evil.example/v1',
     'http://169.254.169.254/v1', 'file:///etc/passwd',
     'http://user:password@127.0.0.1:8317',
     'http://127.0.0.1:8317/management.html#/login',
     'http://127.0.0.1:8317/v1?redirect=other', 'http://127.0.0.1:0',
 ])
-def test_only_local_api_urls_allowed(client, url):
+def test_unsafe_api_urls_rejected(client, url):
     assert configure(client, baseUrl=url).status_code == 400
 
 

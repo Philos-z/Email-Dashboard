@@ -160,7 +160,7 @@ async function openAiSettings(){
  try{
   const config=await api('/api/ai/config');
   if(!document.getElementById('aiSettingsLoading'))return;
-  openModal('模型 API 设置',`<p>填写自己的 OpenAI 兼容 API 地址、密钥和模型。支持 HTTPS 服务和本机代理。</p>
+  openModal('模型 API 设置',`<p>填写自己的 OpenAI 兼容 API 地址、密钥和模型。支持 HTTPS 服务、本机及局域网 IPv4 代理，例如 http://192.168.1.20:8317/v1。</p>
   <form id="aiSettingsForm" autocomplete="off">
    <label for="aiBaseUrl">API 地址</label><input class="lan-input" id="aiBaseUrl" type="url" value="${htmlEsc(config.baseUrl)}" required>
    <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写自己的 API 密钥'}">

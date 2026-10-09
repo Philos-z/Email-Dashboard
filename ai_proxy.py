@@ -17,6 +17,7 @@ from fastapi import HTTPException
 CONFIG_PATH = runtime_settings.DATA / "ai_proxy.json"
 CONFIG_LOCK = Lock()
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
+LAN_NETWORKS = tuple(ipaddress.ip_network(cidr) for cidr in ('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'))
 
 
 def normalize_base_url(value):
@@ -29,19 +30,23 @@ def normalize_base_url(value):
         raise ValueError("API 地址无效") from None
     host = (url.hostname or '').lower()
     local = host in {'localhost', '127.0.0.1', '::1'}
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        address = None
+    lan = isinstance(address, ipaddress.IPv4Address) and any(address in network for network in LAN_NETWORKS)
     invalid = bool(url.scheme not in {'http', 'https'} or not host
                or url.username is not None or url.password is not None
                or url.query or url.fragment or port == 0
-               or (not local and url.scheme != 'https')
+               or (not local and not lan and url.scheme != 'https')
                or host.endswith(('.local', '.internal')) or '..' in url.path
                or '%' in url.path or not re.fullmatch(r'/[A-Za-z0-9_./-]*|', url.path))
-    try:
-        address = ipaddress.ip_address(host)
-        invalid |= not local and not address.is_global
-    except ValueError:
+    if address is not None:
+        invalid |= not local and not lan and not address.is_global
+    else:
         invalid |= not local and '.' not in host
     if invalid:
-        raise ValueError("API 地址须为公开 HTTPS 地址，或本机 HTTP 代理地址；不能包含凭据、查询参数或片段")
+        raise ValueError("API 地址须为公开 HTTPS 地址、本机地址或局域网 IPv4 地址；不能包含凭据、查询参数或片段")
     host = '[::1]' if host == '::1' else '127.0.0.1' if host == 'localhost' else host
     path = url.path.rstrip('/') or '/v1'
     return f"{url.scheme}://{host}{':' + str(port) if port else ''}{path}"

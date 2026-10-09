@@ -195,7 +195,7 @@ text=re.sub(r'<h3>数据来源与精度</h3>.*?</div><div class="card settings-c
 text=re.sub(r'function renderSettings\(\)\{[^\n]*\}', "function renderSettings(){const el=document.getElementById('localSaveInfo');if(el)el.textContent='当前 '+model.items.length+' 项事项 · 本机 SQLite · '+(model.timezone||'UTC');loadSetupStatus();}", text, count=1)
 # Replace deployment-specific cards rather than naming a particular computer or account.
 text=re.sub(r'<h3>Outlook MCP · 邮件自动刷新</h3><p>.*?</p>', '<h3>邮箱 · 自动刷新</h3><p>支持自己的 Outlook 和 Gmail。后台每小时检查收件箱、存档与已发送邮件；所选时区 00:00–06:00 暂停。自动刷新默认关闭。</p>', text, count=1, flags=re.S)
-text=re.sub(r'<h3>本地 API · AI 助手</h3><p>.*?</p>', '<h3>自己的 API · AI 助手</h3><p>使用自己的 OpenAI 兼容 API 和模型。支持 HTTPS 服务及本机代理；密钥只保存在本机后端。</p>', text, count=1, flags=re.S)
+text=re.sub(r'<h3>本地 API · AI 助手</h3><p>.*?</p>', '<h3>自己的 API · AI 助手</h3><p>使用自己的 OpenAI 兼容 API 和模型。支持 HTTPS 服务、本机及局域网代理；密钥只保存在看板后端。</p>', text, count=1, flags=re.S)
 text=re.sub(r'数据与设置</h1><p>Mac SQLite.*?</p>', '数据与设置</h1><p>连接自己的邮箱、API 和模型，按所选时区整理项目。</p>', text, count=1)
 text=text.replace('<div class="settings-grid">','<div class="settings-grid"><div class="card settings-card"><h3>邮箱与连接</h3><p id="accountSetupStatus">尚未完成设置。</p><button class="btn primary" type="button" data-lan-action="mail-settings">邮箱与 API 设置</button></div>',1)
 text=text.replace('<div class="focus-page-heading">','<aside class="setup-banner" id="setupBanner"><div><strong>从自己的邮箱开始</strong><p>连接 Outlook 或 Gmail，再填写自己的 API 和模型。</p></div><button class="btn primary" type="button" data-lan-action="mail-settings">开始设置 ↗</button></aside><div class="focus-page-heading">',1)

@@ -22,6 +22,8 @@ Validation errors use 400, unauthenticated requests 401, conflicting configurati
 
 The model endpoint must implement OpenAI-compatible `/models` (optional if entering the model name directly) and `/chat/completions` with `choices[].message.content`. Mail chat additionally requires function tools: `tools`, `tool_choice`, `choices[].message.tool_calls` and `role: "tool"` messages. Requests use a Bearer API key, redirects are disabled, and system HTTP proxy environment variables are ignored. Native Anthropic / Gemini request formats require an OpenAI-compatible gateway.
 
+Model base URLs accept public HTTPS endpoints, loopback HTTP/HTTPS and literal RFC1918 IPv4 HTTP/HTTPS (`10/8`, `172.16/12`, `192.168/16`). Link-local/metadata endpoints, URL credentials, query strings and fragments are rejected. API calls originate from the dashboard backend, so loopback works when proxy and backend share a host; a separate backend uses the proxy host's LAN address. Changing the URL requires re-entering the API key. HTTPS certificate validation remains enabled. No listener, firewall or authorization settings are changed by saving an API URL.
+
 ### Read-only Outlook assistant
 
 `assistant_chat.py` exposes only `search_outlook_mail`, `list_outlook_mail` and `read_outlook_mail`. The backend maps these to the configured MCP server's `microsoft_outlook_email.search_messages`, `list_messages` and `fetch_message`. It verifies the configured account through `mail_provider.connect` before reading any message, honors `shareWithModel`, and rejects changed settings before sending retrieved content to the model. Gmail live chat is not enabled in this version; Gmail sync and project-summary chat remain available.

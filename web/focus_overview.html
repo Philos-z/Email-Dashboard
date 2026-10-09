@@ -1,0 +1,18 @@
+<section class="view active" id="view-overview" aria-label="今日焦点">
+  <div class="focus-page-heading"><div><p class="focus-date" id="focusDate"></p><h1>现在最重要的</h1><span class="focus-title-line" aria-hidden="true"></span></div><button class="btn" type="button" data-navigate="actions">全部行动 ↗</button></div>
+  <div class="focus-layout">
+    <section class="focus-workbench" aria-labelledby="focusHeading">
+      <header class="focus-workbench-heading"><div><h2 id="focusHeading">优先<span>行动</span></h2><p id="focusSummary" aria-live="polite"></p></div><div class="focus-filters" role="group" aria-label="重点事项优先级"><button type="button" data-focus-priority="all" aria-pressed="true">P0 ＋ P1</button><button type="button" data-focus-priority="P0" aria-pressed="false">P0</button><button type="button" data-focus-priority="P1" aria-pressed="false">P1</button></div></header>
+      <div id="focusActions" class="focus-actions"></div>
+      <button type="button" class="focus-more" id="focusMore" data-focus-expand hidden></button>
+    </section>
+    <aside class="focus-agenda" aria-labelledby="agendaHeading"><header class="focus-agenda-heading"><h2 id="agendaHeading">近期节点</h2><span>未来 30 天 · 德国时间</span></header><div id="focusAgenda" class="focus-agenda-list"></div><p class="focus-agenda-note">确认日程和手动计划分开标记；点击节点查看依据。</p></aside>
+  </div>
+  <details class="focus-waiting" id="focusWaitingSection"><summary><span>等待外部反馈</span><span id="focusWaitingCount"></span><span class="focus-waiting-preview" id="focusWaitingPreview"></span></summary><div id="focusWaiting" class="focus-waiting-list"></div></details>
+  <details class="overview-secondary"><summary>项目概况与历史进展 <span>查看统计、里程碑与重点项目</span></summary>
+    <section class="section"><div class="section-heading"><h2>当前项目概况</h2></div><div class="metrics" id="metrics"></div></section>
+    <div class="section overview-charts"><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">事项类型分布</div><div class="chart-sub">按当前项目记录统计</div></div></div><div id="categoryChart" class="bar-group"></div></div><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">工作流状态</div><div class="chart-sub">等待、待核实和持续跟踪分开统计</div></div></div><div class="donut-wrapper"><div class="donut" id="statusDonut"><div class="donut-center"><strong id="donutNumber"></strong><span>事项总数</span></div></div><div class="legend" id="donutLegend"></div></div></div></div>
+    <div class="section split"><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">已记录里程碑</div><div class="chart-sub">仅统计带明确日期且已确认的节点</div></div></div><div id="monthChart" class="chart-months"></div></div><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">最近确认的进展</div><div class="chart-sub">从项目里程碑汇集</div></div><button class="linklike" data-navigate="activity">完整记录 ↗</button></div><div class="recent-list" id="recentUpdates"></div></div></div>
+    <div class="section"><div class="section-heading"><h2>重点项目</h2><button class="linklike" data-navigate="projects">查看全部 ↗</button></div><div class="project-grid" id="overviewProjects"></div></div>
+  </details>
+</section>

@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>Progress Atlas · 邮件自动刷新</title>
+<style>
+:root{--ink:#14233a;--text:#263a52;--muted:#75849a;--subtle:#9ba8b7;--line:#e4eaf1;--bg:#f5f7fb;--white:#fff;--blue:#5368d6;--indigo:#3e4ea5;--cyan:#00a8a2;--red:#bd4d5b;--amber:#b17a2b;--shadow:0 10px 32px rgba(38,57,97,.045);--radius:17px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}button,input,textarea,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #98b4ff;outline-offset:2px}a{color:inherit}
+.layout{display:flex;min-height:100vh}.sidebar{width:242px;flex:0 0 242px;background:#15243d;color:#bfccdc;min-height:100vh;position:sticky;top:0;align-self:flex-start;padding:28px 17px;display:flex;flex-direction:column;height:100vh;z-index:10}.brand{display:flex;align-items:center;gap:11px;padding:6px 10px 30px}.logo{display:grid;place-items:center;width:37px;height:37px;background:linear-gradient(145deg,#7189f1,#18b0ab);border-radius:12px;color:#fff;font-weight:800;font-size:19px;box-shadow:0 10px 20px #07172f66}.brand strong{display:block;font-weight:800;color:#fff;font-size:15px;letter-spacing:-.3px}.brand small{display:block;font-size:10px;letter-spacing:1.5px;color:#98abc4;margin-top:3px}.side-section{font-size:10px;color:#7489a6;font-weight:800;letter-spacing:2px;margin:18px 14px 12px}.navbtn{display:flex;align-items:center;gap:12px;width:100%;padding:12px 13px;border:0;border-radius:11px;background:transparent;color:#a8b9ce;text-align:left;font-weight:650;transition:.15s}.navbtn:hover{background:#263a55;color:#fff}.navbtn.active{background:#30425e;color:#fff;box-shadow:inset 3px 0 #6c86ff}.navicon{width:22px;text-align:center;font-size:18px;font-weight:500;color:#95acdd}.navbtn.active .navicon{color:#fff}.navcount{margin-left:auto;background:#536a8c55;color:#aebfd2;font-size:11px;padding:3px 7px;border-radius:12px}.side-bottom{margin-top:auto}.side-note{background:#1e304c;border:1px solid #2b405f;border-radius:14px;padding:14px;margin:15px 4px 0;line-height:1.65}.side-note strong{color:#fff;font-weight:700}.side-note p{margin:4px 0 0;font-size:11px;color:#94aac5}.online-indicator{display:inline-block;border-radius:50%;height:7px;width:7px;background:#4fcca9;vertical-align:middle;margin-right:5px}.side-footer{font-size:10px;color:#6f85a3;margin:22px 10px 4px}
+.main{width:calc(100% - 242px);min-width:0}.topbar{height:74px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(22px,3.3vw,56px);background:rgba(255,255,255,.91);border-bottom:1px solid #e9edf3;position:sticky;top:0;z-index:8;backdrop-filter:blur(16px)}.breadcrumbs{font-weight:700;color:#58667a;font-size:12px;letter-spacing:.3px}.breadcrumbs span{color:#a4b0bf;margin:0 10px}.topcontrols{display:flex;align-items:center;gap:13px}.todaychip{color:#62748e;font-size:12px;padding:8px 12px;border:1px solid #e5eaf2;border-radius:40px;background:#f7f9fc}.btn{border:1px solid #dde5ef;border-radius:10px;background:#fff;color:#40536c;padding:9px 14px;font-size:12px;font-weight:730;transition:.15s;display:inline-flex;align-items:center;gap:7px;justify-content:center}.btn:hover{border-color:#aebfe4;background:#f7faff}.btn.primary{background:#4e64d2;color:#fff;border-color:#4e64d2}.btn.primary:hover{background:#4054c4}.btn.ghost{border:0;background:transparent}.btn.danger{color:#b84d57;border-color:#ead4d7}.btn.small{padding:7px 11px}.onlymobile{display:none}.content{max-width:1640px;padding:36px clamp(22px,3.3vw,56px) 64px;margin:0 auto}.view{display:none}.view.active{display:block}.hero{position:relative;overflow:hidden;border-radius:21px;min-height:211px;background:linear-gradient(118deg,#202d51 0%,#364c83 54%,#4f6aba 100%);color:#fff;padding:35px 40px;display:flex;align-items:center;justify-content:space-between;gap:30px;box-shadow:0 17px 34px rgba(42,67,135,.12)}.hero:after{content:"";position:absolute;right:-80px;top:-245px;width:580px;height:580px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 50px #ffffff09,0 0 0 105px #ffffff07,0 0 0 170px #ffffff05;pointer-events:none}.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:#a6b9fb;text-transform:uppercase}.hero h1{font-size:clamp(27px,3vw,39px);margin:16px 0 12px;letter-spacing:-1.2px}.hero p{max-width:640px;color:#d2def9;margin:0;line-height:1.9;font-size:13px}.hero-aside{z-index:1;min-width:186px;align-self:flex-end;text-align:right}.hero-aside .big{font-weight:800;font-size:42px;letter-spacing:-2px;line-height:1}.hero-aside .small{font-size:11px;color:#d2ddf5;margin-top:7px}.hero-aside .divider{height:1px;background:#ffffff40;margin:17px 0}.hero-aside .date{font-size:12px;color:#e1e8fa;font-weight:650}
+.section{margin-top:30px}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 15px}.section-heading h2{margin:0;font-size:17px;letter-spacing:-.3px}.section-heading p{color:var(--muted);font-size:12px;margin:5px 0 0}.section-heading .linklike{border:0;background:none;color:#5368d6;font-weight:700;font-size:12px;padding:5px 0}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.metric{background:#fff;border:1px solid #e6ecf3;border-radius:15px;padding:19px 20px;box-shadow:var(--shadow);min-height:119px}.metric-label{font-size:12px;color:#708199;font-weight:610;display:flex;align-items:center;gap:8px}.metric-icon{width:25px;height:25px;display:grid;place-items:center;border:1px solid #e5ebf6;border-radius:9px;color:#6275b2;font-size:13px}.metric-value{font-size:33px;font-weight:820;letter-spacing:-1.2px;margin:11px 0 4px;line-height:1.08;color:#172a48}.metric-hint{font-size:10.5px;color:#91a0b3;line-height:1.5}.card{border:1px solid #e5ebf3;border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}.split{display:grid;grid-template-columns:1.35fr .9fr;gap:18px}.overview-charts{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.chartcard{padding:22px 24px;min-height:270px}.chart-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.chart-title{font-size:14px;font-weight:780;color:#1c2e4a}.chart-sub{font-size:10.5px;color:#90a0b1;margin-top:5px}.mini-tag{font-size:10px;color:#8798aa;background:#f5f7fb;padding:6px 8px;border-radius:6px}.bar-group{display:grid;gap:19px}.bar-row{display:grid;grid-template-columns:102px 1fr 26px;align-items:center;gap:12px}.bar-row-name{font-size:12px;color:#53637a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-row-track{height:9px;border-radius:9px;background:#eff3f8;overflow:hidden}.bar-row-fill{height:100%;border-radius:9px;background:#677edb;min-width:3px;transition:width .24s}.bar-row-count{font-size:12px;font-weight:750;color:#465770;text-align:right}.donut-wrapper{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:6px}.donut{width:168px;height:168px;flex:0 0 168px;border-radius:50%;position:relative;background:conic-gradient(#ddd 0 100%)}.donut::after{content:"";position:absolute;inset:29px;background:#fff;border-radius:50%}.donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:1}.donut-center strong{font-size:32px;color:#192b47}.donut-center span{font-size:11px;color:#8b9aac}.legend{display:grid;gap:11px;width:100%}.legend-row{display:flex;align-items:center;gap:9px;font-size:11px;color:#63758c}.legend-row .num{margin-left:auto;font-weight:800;color:#3c5067}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0bdc9;flex-shrink:0}.chart-months{display:flex;align-items:end;gap:14px;height:152px;padding:4px 0 0;justify-content:space-between}.month-col{height:100%;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px}.month-col .thebar{width:min(38px,74%);border-radius:8px 8px 3px 3px;background:linear-gradient(#7589e9,#d4ddfb);min-height:4px;transition:height .2s}.month-col .thebar.zero{background:#eef2f7}.month-col small{color:#8a9aad;font-size:11px}.month-col b{font-size:10px;color:#6b7f9d;font-weight:750}
+.callout{border:1px solid #dedff2;background:#fafbff;padding:15px 18px;border-radius:13px;display:flex;align-items:center;gap:14px;margin:17px 0 0}.callout-icon{font-size:21px;color:#6b77c3}.callout-text{flex:1;color:#64728a;font-size:12px;line-height:1.7}.callout-text strong{color:#31405b;font-size:12px}.priorities{display:grid;gap:10px}.priority-item{display:flex;align-items:flex-start;gap:14px;border:1px solid #e6ebf3;border-radius:12px;background:#fff;padding:15px 16px;text-align:left;width:100%;transition:.15s}.priority-item:hover,.project-card:hover{transform:translateY(-2px);box-shadow:0 11px 26px #243c6b12;border-color:#c9d5ec}.priority-number{background:#f0f2ff;color:#6576c8;min-width:30px;height:30px;display:grid;place-items:center;border-radius:9px;font-weight:820}.priority-body{flex:1;min-width:0}.priority-body strong{font-size:12.5px;color:#253853;display:block;margin:0 0 5px}.priority-body p{color:#76869c;line-height:1.55;margin:0;font-size:11.5px}.priority-end{text-align:right;white-space:nowrap;font-size:11px;color:#8795a7;min-width:78px}.priority-end .p0{color:#ae4b5b;font-weight:800}.recent-list{display:grid;gap:0}.recent-item{display:grid;grid-template-columns:65px 12px 1fr;gap:8px;padding:12px 0;border-bottom:1px solid #f0f2f6;align-items:start}.recent-item:last-child{border:0}.recent-date{font-size:11px;color:#8b99aa}.recent-node{height:9px;width:9px;border-radius:50%;background:#758be4;margin-top:2px}.recent-content{line-height:1.5}.recent-content b{display:block;font-size:11.5px;color:#2b3e58}.recent-content span{display:block;font-size:11px;color:#8594a5;margin-top:3px}
+.project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.project-card{cursor:pointer;padding:20px 20px 18px;min-height:216px;display:flex;flex-direction:column;transition:.15s}.project-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}.category-id{font-size:10.5px;font-weight:780;letter-spacing:.2px;color:#6e7f96}.cat-icon{display:inline-grid;place-items:center;background:#eef2fa;border-radius:9px;font-size:14px;height:28px;width:28px;margin-right:8px;color:#5d74b7}.small-badge{font-size:10px;color:#78899e;border:1px solid #e7ebf0;border-radius:30px;padding:4px 9px;background:#fff;font-weight:730;white-space:nowrap}.small-badge.p0{color:#b95d66;background:#fff7f7;border-color:#f0d8dc}.small-badge.p1{color:#866a41;background:#fffaf2;border-color:#f1e5d3}.project-title{font-size:15px;line-height:1.42;letter-spacing:-.28px;font-weight:780;margin:16px 0 11px;min-height:42px}.project-next{font-size:11.5px;line-height:1.67;color:#6f8198;margin:0 0 18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.project-bottom{margin-top:auto}.project-statusline{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#74869c;margin-bottom:10px}.project-status{display:inline-flex;gap:7px;align-items:center}.progress-track{height:6px;background:#edf1f7;border-radius:20px;overflow:hidden}.progress-fill{height:100%;border-radius:20px;background:#6781df;transition:.2s}.project-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #eff2f6;margin-top:14px;padding-top:11px;color:#a0acbc;font-size:10.5px}.project-tags{color:#8a9cb4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:72%}.project-go{font-size:18px;color:#93a3ba}.empty{display:grid;place-items:center;min-height:250px;text-align:center;color:#8291a6}.empty b{font-size:15px;color:#41516a}
+.page-title{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:21px}.page-title h1{font-size:27px;letter-spacing:-.8px;margin:0}.page-title p{color:#7e8ca1;margin:7px 0 0;font-size:12px}.filters{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:14px;border:1px solid #e5ebf4;background:#fff;border-radius:13px;margin-bottom:18px}.searchbox{position:relative;flex:1;min-width:200px}.searchbox span{position:absolute;left:12px;top:11px;color:#a4b1c0}.searchbox input{width:100%;background:#f8faff;border:1px solid #e5eaf3;border-radius:9px;padding:11px 11px 11px 34px;outline:0;color:#314661;font-size:12px}.filters select,.form-control{border:1px solid #e2e9f1;background:#f8faff;color:#4e617a;border-radius:9px;padding:11px;min-width:112px;font-size:12px}.filters .btn{white-space:nowrap}.filter-counter{color:#889ab0;font-size:11px;margin-left:auto}.filterhint{color:#91a0b4;font-size:11px;margin:3px 0 20px}
+.timeline-card{overflow:auto;border:1px solid #e5eaf2;border-radius:16px;background:#fff;box-shadow:var(--shadow)}.tl-inner{min-width:1160px}.tl-header,.tl-row{display:grid;grid-template-columns:250px minmax(850px,1fr)}.tl-header{background:#f8faff;border-bottom:1px solid #e9eef5;position:sticky;top:0;z-index:3}.tl-heading{padding:18px 22px;font-size:11px;color:#75869a;font-weight:750}.tl-months{display:grid;grid-template-columns:repeat(7,1fr)}.tl-month{padding:18px 8px;font-size:11px;text-align:center;border-left:1px solid #e9eef4;color:#72849d}.tl-row{border-bottom:1px solid #eff2f7;cursor:pointer;min-height:57px}.tl-row:hover{background:#f9fbff}.tl-name{padding:11px 18px 11px 22px;display:flex;align-items:center;gap:9px;min-width:0}.tl-name b{font-size:11.5px;color:#3b4e67;font-weight:680;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tl-dates{position:relative;margin:0;background:repeating-linear-gradient(to right,transparent 0,transparent calc(100% / 7 - 1px),#edf1f6 calc(100% / 7 - 1px),#edf1f6 calc(100% / 7));height:57px}.tl-bar{position:absolute;top:22px;height:12px;border-radius:9px;background:#89a2e6;box-shadow:0 0 0 1px #ffffffaa inset;min-width:12px}.tl-bar.done{background:#64afa7}.tl-bar.waiting{background:#d5b683}.tl-bar.blocked{background:#d39096}.tl-bar.verification{background:#b09ed6}.tl-start{position:absolute;top:20px;height:16px;width:16px;border:3px solid #fff;background:#586fcf;box-shadow:0 0 0 1px #d9e3f0;border-radius:50%;z-index:2}.tl-end{position:absolute;top:20px;height:16px;width:16px;border:3px solid #fff;background:#92a3be;box-shadow:0 0 0 1px #d9e3f0;border-radius:50%;z-index:2}.tl-key{display:flex;gap:18px;color:#92a0b1;font-size:11px;flex-wrap:wrap}
+.action-tabs{display:flex;gap:6px;background:#eef2f8;border-radius:11px;padding:5px;width:max-content;max-width:100%;overflow:auto;margin:0 0 19px}.action-tab{border:0;background:transparent;padding:10px 16px;border-radius:8px;color:#667891;font-size:12px;font-weight:730;white-space:nowrap}.action-tab.active{background:#fff;color:#4d62bd;box-shadow:0 2px 8px #3b527419}.action-list{display:grid;gap:10px}.action-row{display:grid;grid-template-columns:5px 1fr auto;gap:17px;padding:18px 22px;align-items:center;background:#fff;border:1px solid #e5ebf2;border-radius:13px;cursor:pointer}.action-row:hover{border-color:#c1cfea;background:#fbfcff}.action-stripe{height:49px;border-radius:6px;background:#7592da}.action-info strong{font-size:13px;display:block;color:#30415b}.action-info p{font-size:11.5px;color:#70839a;line-height:1.65;margin:6px 0 0}.action-small{font-size:10px;color:#91a0b1;margin-top:6px}.action-right{text-align:right;white-space:nowrap}.action-right b{display:block;font-size:11px;color:#52667d}.action-right small{display:block;margin-top:5px;font-size:10.5px;color:#8b9db1}
+.activity-card{padding:23px 26px}.event-stack{border-left:1px solid #d7e0ef;margin-left:57px}.event{position:relative;padding:0 0 22px 27px}.event:before{position:absolute;left:-5px;top:5px;width:9px;height:9px;background:#758cdd;border:2px solid #fff;content:"";border-radius:50%;box-shadow:0 0 0 1px #d9e3f5}.event .event-date{position:absolute;left:-83px;top:1px;color:#8b9aae;font-size:11px;width:71px;text-align:right}.event strong{font-size:12px;color:#304058}.event p{color:#6d7c92;line-height:1.6;margin:5px 0 4px;font-size:11.5px}.event small{color:#9cacbe;font-size:10px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.settings-card{padding:24px}.settings-card h3{margin:0 0 13px;font-size:15px}.settings-card p{font-size:12px;line-height:1.9;color:#667990}.settings-card .btn{margin-right:8px;margin-top:8px}.info-list{line-height:2.2;font-size:12px;color:#61758d;padding:0 0 0 16px}.footer{font-size:10.5px;color:#9aa7b6;display:flex;justify-content:space-between;gap:20px;margin-top:48px;border-top:1px solid #e1e7ef;padding-top:22px}
+.overlay{position:fixed;inset:0;background:#0b172a8c;backdrop-filter:blur(2px);z-index:19;display:none}.overlay.open{display:block}.drawer{position:fixed;top:0;right:0;bottom:0;width:min(650px,100%);z-index:20;background:#fff;box-shadow:-20px 0 70px #10223c26;transform:translateX(101%);transition:transform .24s;display:flex;flex-direction:column}.drawer.open{transform:translateX(0)}.drawer-head{padding:26px 28px 22px;border-bottom:1px solid #e8edf4;display:flex;align-items:start;justify-content:space-between;gap:16px;background:#fff;z-index:1}.drawer-head h2{font-size:22px;line-height:1.4;margin:10px 0 0;letter-spacing:-.4px}.drawer-head p{color:#8a9aac;font-size:11px;margin:9px 0 0}.xbtn{background:#f1f4f8;border:0;border-radius:10px;width:36px;height:36px;display:grid;place-items:center;font-size:21px;color:#718399;flex-shrink:0}.drawer-body{padding:26px 28px 60px;overflow:auto;flex:1}.drawer-section{margin-bottom:26px}.drawer-section h3{font-size:12px;font-weight:790;color:#5c6e87;letter-spacing:.5px;margin:0 0 13px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{font-size:11px;color:#7a8a9f;font-weight:700;display:block;margin:0 0 7px}.field input,.field select,.field textarea{width:100%;border:1px solid #dfe7f0;border-radius:9px;background:#fbfcfe;padding:11px 12px;color:#2f4561;font-size:12px;outline:none}.field textarea{line-height:1.6;min-height:77px;resize:vertical}.field.span2{grid-column:span 2}.milestone-list{display:grid;gap:9px}.mile{display:grid;grid-template-columns:19px 1fr;align-items:start;gap:10px;padding:13px 14px;border:1px solid #e5eaf2;background:#fff;border-radius:10px}.mile input{margin:2px 0 0;accent-color:#6079db;width:16px;height:16px}.mile strong{font-size:12px;color:#31445f;line-height:1.55;font-weight:620;display:block}.mile.completed strong{color:#788ba0}.mile small{display:block;color:#9aaabd;margin-top:5px;font-size:10px}.mile-add{display:flex;gap:8px;margin-top:11px}.mile-add input{flex:1;min-width:0;border:1px solid #dfe6f0;border-radius:9px;padding:10px 12px;color:#344d6b}.blocker{background:#fff9f8;border:1px solid #f3e1df;color:#8e6871;padding:14px;border-radius:10px;font-size:11.5px;line-height:1.8}.drawer-progress{background:#f5f7fc;padding:15px;border-radius:11px;display:flex;align-items:center;gap:17px}.drawer-progress strong{font-size:24px;color:#5268c8}.drawer-progress span{font-size:11px;color:#8192a7;line-height:1.7}.drawer-footer{padding:15px 28px;border-top:1px solid #e6ecf4;display:flex;justify-content:space-between;background:#fff;gap:10px}.toast{position:fixed;bottom:23px;left:50%;transform:translateX(-50%) translateY(50px);background:#263955;color:#fff;padding:12px 20px;border-radius:11px;z-index:100;opacity:0;pointer-events:none;transition:.24s;font-size:12px;box-shadow:0 8px 40px #1328412d}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:1250px){.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-charts{grid-template-columns:1fr}.donut-wrapper{justify-content:flex-start}.legend{max-width:320px}.hero-aside{min-width:115px}}
+@media(max-width:900px){.sidebar{width:66px;flex-basis:66px;padding:25px 9px}.brand{padding:0 3px 28px}.brand strong,.brand small,.side-section,.navbtn span:not(.navicon),.navcount,.side-bottom{display:none}.navbtn{justify-content:center;padding:12px 8px}.navicon{width:100%}.main{width:calc(100% - 66px)}.topbar{padding:0 22px}.split{grid-template-columns:1fr}}
+@media(max-width:600px){.layout{display:block}.sidebar{height:auto;min-height:0;position:fixed;bottom:0;top:auto;width:100%;padding:7px;flex-direction:row;z-index:12;border-top:1px solid #3d516f}.brand,.side-section,.sidebar .side-bottom,.side-footer{display:none}.sidebar nav{display:flex;width:100%;justify-content:space-around}.navbtn{display:grid;place-items:center;padding:7px 2px;font-size:10px;gap:2px;width:20%;line-height:1}.navbtn span:not(.navicon){display:block!important;font-size:9px;white-space:nowrap}.navcount{display:none!important}.navicon{font-size:18px}.main{width:100%;padding-bottom:65px}.topbar{height:61px;padding:0 15px}.topcontrols{gap:7px}.todaychip{display:none}.topcontrols .btn:not(.primary){display:none}.content{padding:22px 15px 54px}.hero{min-height:216px;padding:26px 23px}.hero-aside{display:none}.hero h1{font-size:26px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{min-height:110px;padding:15px}.metric-value{font-size:27px}.section{margin-top:25px}.project-grid{grid-template-columns:1fr}.chartcard{padding:18px}.donut{width:130px;height:130px;flex-basis:130px}.donut::after{inset:23px}.donut-wrapper{gap:12px}.legend{gap:8px}.section-heading h2{font-size:15px}.page-title{align-items:flex-start}.page-title h1{font-size:23px}.page-title .btn{font-size:11px;padding:8px}.action-row{padding:14px;gap:11px}.action-right{min-width:64px}.formgrid{grid-template-columns:1fr}.field.span2{grid-column:span 1}.drawer-head,.drawer-body{padding:21px}.drawer-footer{padding:13px 20px}.settings-grid{grid-template-columns:1fr}.footer{display:block}.footer span{display:block;margin:7px 0}.filters select{flex:1}}
+@media print{.sidebar,.topbar,.btn,.filters,.drawer,.overlay,.action-tabs{display:none!important}.main{width:100%}.view{display:block!important;page-break-before:always}.view:first-of-type{page-break-before:avoid}.project-card{break-inside:avoid}.hero{color:#fff;print-color-adjust:exact}.content{padding:15px}}
+</style>
+<style>
+.evidence-list{display:grid;gap:10px}.evidence-item{border:1px solid #e4eaf4;border-left:3px solid #7686d3;border-radius:9px;background:#fbfcff;padding:11px 13px}.evidence-item strong{display:block;font-size:12px;line-height:1.55;color:#354769}.evidence-item p{margin:5px 0 0;font-size:11px;line-height:1.7;color:#74829a}.evidence-date{font-size:10px;letter-spacing:.2px;color:#6377ad;font-weight:800;margin-bottom:4px}.evidence-help{color:#8a98ac;font-size:11px;line-height:1.6;margin:0 0 10px}
+</style>
+
+<style id="today-styles">
+.today-section{margin-top:18px}.today-snapshot{border:1px solid #dce5f1;background:linear-gradient(112deg,#ffffff,#f7f9fe);padding:23px 26px;border-radius:17px;display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:var(--shadow)}
+.today-snapshot-heading span{font-size:10px;font-weight:850;letter-spacing:1.7px;color:#5470a3}.today-snapshot-heading h2{margin:6px 0 7px;font-size:23px;letter-spacing:-.6px}.today-snapshot-heading p{margin:0;color:#708098;font-size:12px;line-height:1.7}.today-totals{display:flex;gap:15px;flex-shrink:0}.today-total{min-width:90px;text-align:center;border-left:1px solid #e3eaf3;padding-left:14px}.today-total strong{display:block;font-size:25px;color:#263f73;font-weight:850}.today-total span{font-size:10px;color:#7b8da6;display:block;margin-top:5px}.today-quick-heading{margin-top:24px}.today-quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.today-quick-card{background:#fff;border:1px solid #e5ebf3;text-align:left;border-radius:14px;padding:15px 18px;box-shadow:var(--shadow);display:block;color:#273b59;min-width:0}.today-quick-card:hover{border-color:#b8c8eb;background:#fbfcff}.today-quick-card.urgent{border-left:4px solid #b95a65}.today-quick-top{display:flex;gap:10px;justify-content:space-between;align-items:center}.today-quick-top time{font-size:11px;color:#57739b;font-weight:800}.today-quick-top span{font-size:10px;color:#8899ab}.today-quick-card h3{margin:9px 0 6px;font-size:13px;line-height:1.55}.today-quick-card p{margin:0;color:#6c7d91;font-size:11.5px;line-height:1.65}.today-quick-foot{margin-top:9px;color:#4d6696;font-weight:750;font-size:11px}.today-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 20px}.today-toolbar .active{background:#334c80;color:white;border-color:#334c80}.today-list{display:grid;gap:11px}.today-full-card{border:1px solid #e4eaf3;border-radius:14px;background:#fff;padding:20px 22px;display:grid;grid-template-columns:82px 1fr;gap:18px;box-shadow:var(--shadow)}.today-full-card.urgent{border-left:4px solid #b85a64}.today-time{color:#546b8f;font-size:20px;font-weight:850;letter-spacing:-.5px}.today-time small{display:block;font-size:10px;color:#99a6b7;font-weight:500;margin-top:3px}.today-category{font-size:10px;font-weight:800;letter-spacing:.7px;color:#7e8fa4;margin:0 0 6px}.today-full-card h3{font-size:15px;color:#223550;margin:0 0 8px}.today-full-card p{font-size:12px;color:#65768c;line-height:1.75;margin:0 0 9px}.today-next{border-top:1px dashed #e4ebf4;padding-top:10px;color:#455d7b;font-size:11.8px;line-height:1.6}.today-source{margin-top:11px;font-size:10px;color:#8493a6;overflow-wrap:anywhere}.today-project-button{padding:7px 12px;background:#f1f5fc;color:#3e5787;border:0;border-radius:8px;font-weight:720;font-size:11px;margin-top:10px}.today-project-button:hover{background:#e4edfa}.today-promotional{opacity:.7}
+@media(max-width:820px){.today-snapshot{flex-direction:column;align-items:flex-start}.today-totals{width:100%;justify-content:space-between}.today-total:first-child{border-left:0;padding-left:0}.today-quick-grid{grid-template-columns:1fr}.today-full-card{grid-template-columns:55px 1fr;gap:12px;padding:17px 15px}.today-time{font-size:16px}}
+@media(max-width:470px){.today-totals{gap:6px}.today-total{min-width:0;padding-left:8px}.today-total strong{font-size:21px}.today-snapshot{padding:18px}.today-full-card{grid-template-columns:1fr}.today-time small{display:inline;margin-left:7px}}
+</style>
+<style>
+#connectionStatus{background:#eef5fc;color:#2f6885}.lan-modal-backdrop:not([hidden]){position:fixed;inset:0;z-index:100000;background:#0d1b33b8;display:grid;place-items:center;padding:18px}.lan-modal{background:white;width:min(780px,100%);max-height:90vh;overflow:auto;border-radius:18px;padding:24px;box-shadow:0 28px 90px #07182b55;color:#20314a}.lan-modal>header{display:flex;justify-content:space-between;align-items:center;gap:20px}.lan-modal h2{font-size:20px;margin:0 0 12px}.lan-modal textarea{width:100%;min-height:190px;margin:8px 0 12px;line-height:1.5;font-family:ui-monospace,monospace;font-size:12px;padding:12px;border:1px solid #dce5ed;border-radius:9px}.lan-modal label{display:block;font-size:12px;font-weight:650}.lan-modal select{padding:9px;border:1px solid #dce5ed;border-radius:8px;margin-right:10px}.lan-modal p{line-height:1.65;color:#60728a}.lan-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.lan-note{background:#f2f6fb;border:1px solid #e2e9f4;padding:12px;border-radius:10px;margin:14px 0;color:#526178}.lan-diff{margin:8px 0;padding:12px;border:1px solid #dce5ed;border-radius:10px}.lan-diff h4{margin:0 0 6px}.lan-diff code{word-break:break-all}#mcpLastChecked{font-size:12px}
+.item-context-summary{font-size:13px;line-height:1.8;color:#425974;white-space:pre-wrap}.lan-input{display:block;box-sizing:border-box;width:100%;padding:11px 12px;margin:7px 0 16px;border:1px solid #dce5ed;border-radius:9px;font:inherit;color:inherit}.lan-checkbox{display:flex!important;align-items:center;gap:8px;font-weight:400!important;line-height:1.6}.lan-checkbox input{width:17px;height:17px;flex-shrink:0}.lan-ai-conversation{max-height:36vh;overflow:auto;margin:16px 0}.lan-ai-message{background:#f3f6fa;padding:14px;border-radius:12px;margin:10px 0}.lan-ai-message strong{display:block;font-size:12px;color:#65748a;margin-bottom:8px}.lan-ai-message>div{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.75}.lan-ai-user{background:#eef1ff}.lan-modal button:disabled{opacity:.55;cursor:wait}#aiMessage{min-height:90px;box-sizing:border-box;font-family:inherit;font-size:14px}#aiChatStatus{color:#8c4963;line-height:1.6}
+@media(max-width:1250px){.topcontrols #currentDate,.topcontrols [data-global-action="export-json"]{display:none}.topcontrols{gap:8px}}
+@media(max-width:900px){#connectionStatus{display:none}}
+@media(max-width:820px){.topcontrols [data-lan-action="open-mcp"]{display:none}}
+@media(max-width:600px){.topcontrols .btn[data-lan-action="open-ai"]{display:inline-flex!important}.lan-modal{box-sizing:border-box;padding:18px}}
+</style>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style id="atlas-theme">
+/* Philos Haircut: Noto Sans SC, Playfair Display, forest green, white and gold. */
+:root{--ink:#1e3231;--text:#344844;--muted:#697a75;--subtle:#7d8c87;--line:#dfe6e2;--bg:#f5f7f6;--white:#fff;--blue:#426357;--indigo:#1e3231;--cyan:#587b6a;--red:#ae5147;--amber:#8b641b;--gold:#e9b44c;--shadow:none;--radius:6px}
+body{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;color:var(--ink);background:var(--bg)}
+button,input,select,textarea{font-family:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #c68e2b;outline-offset:3px}
+h1,h2,h3{font-family:"Noto Sans SC","PingFang SC",sans-serif;color:var(--ink)}
+.layout{display:block}.main{width:100%;padding-bottom:0}.topbar{height:79px;padding:0 max(24px,calc((100vw - 1360px)/2));background:#fff;border-bottom:1px solid var(--line);backdrop-filter:none}
+.atlas-brand{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:28px;line-height:1.4;position:relative;padding:0 5px;white-space:nowrap;width:max-content;max-width:100%;flex-shrink:0}.atlas-brand:before{content:"";position:absolute;left:34px;right:0;top:19px;bottom:0;background:var(--gold);opacity:.7}.atlas-brand>span{position:relative}
+.breadcrumbs{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.topcontrols{gap:10px}.todaychip,#connectionStatus{border-color:var(--line);background:var(--bg);color:var(--muted);font-size:11px}.btn{border-color:var(--line);color:var(--ink);background:#fff;border-radius:5px;font-weight:600}.btn:hover{border-color:#9eafa6;background:#f1f5f2}.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:700}.btn.primary:hover{background:#dba43c;border-color:#dba43c}.btn.danger{color:var(--red);border-color:#e7cac4}
+.workspace-nav{display:flex;align-items:stretch;justify-content:center;gap:5px;padding:8px 22px;background:#1e3231;flex-wrap:wrap}.workspace-nav .navbtn{width:auto;display:flex;gap:8px;justify-content:center;align-items:center;padding:10px 15px;border-radius:4px;font-size:13px;font-weight:500;color:#c7d2cc;box-shadow:none}.workspace-nav .navbtn:hover{background:#314942;color:#fff}.workspace-nav .navbtn.active{background:#34493f;color:#f1c976;box-shadow:none}.workspace-nav .navbtn>span{display:inline}.workspace-nav .navicon{color:inherit;width:auto;font-size:16px}.workspace-nav .navcount{margin-left:4px;background:#42584d;color:#dbe3dd;padding:1px 6px;border-radius:4px;font-size:10px}
+.content{max-width:1408px;padding:29px 24px 44px}.section-heading h2{font-weight:800}.section-heading .linklike,.linklike{color:#436453}.card,.metric,.filters,.action-row,.today-full-card,.today-quick-card,.activity-card,.timeline-card{border-color:var(--line);border-radius:6px;box-shadow:none;background:#fff}.metric-label,.metric-hint,.chart-sub,.legend-row,.filterhint,.page-title p,.project-next,.project-statusline,.project-tags,.project-footer,.action-info p,.action-small,.action-right small,.event p,.event small,.settings-card p,.info-list{color:var(--muted)}.metric-value,.chart-title,.donut-center strong,.legend-row .num,.project-title,.category-id,.action-info strong,.action-right b,.event strong,.today-full-card h3,.today-quick-card h3{color:var(--ink)}.metric-icon,.cat-icon{background:#edf3ee;border-color:var(--line);color:#456451;border-radius:5px}.metric{padding:18px}.metric-value{font-size:30px}.project-card:hover,.priority-item:hover{transform:none;border-color:#9db09f;box-shadow:0 3px 12px #1e32310a}.small-badge{border-radius:4px}.small-badge.p0{background:#fbefd5;border-color:#ecd69d;color:#825b11}.small-badge.p1{background:#edf3ee;border-color:#dbe6de;color:#496451}.progress-track,.bar-row-track{background:#edf2ee}.progress-fill,.bar-row-fill{background:#6b8b73!important}.month-col .thebar{background:#79977e}.month-col .thebar.zero{background:#edf2ee}.donut::after{background:#fff}.recent-content b{color:var(--ink)}.recent-content span,.recent-date{color:var(--muted)}.recent-node,.event:before{background:#719176}.recent-item{border-color:var(--line)}
+.filters input,.filters select,.field input,.field textarea,.field select,.lan-input{background:#fbfcfb;border-color:var(--line);color:var(--text);border-radius:5px}.searchbox span{color:var(--muted)}.action-tabs{background:#e8eeea;border-radius:6px}.action-tab{border-radius:4px;color:var(--muted)}.action-tab.active{color:var(--ink);box-shadow:none}.action-row:hover{background:#f9fbf9;border-color:#b6c7bb}.tl-header{background:#f2f6f3}.tl-heading,.tl-month,.tl-name b,.tl-key{color:var(--muted)}.tl-row:hover{background:#f6faf6}.tl-header,.tl-row,.tl-month{border-color:var(--line)}.callout{border-color:var(--line);background:#f1f5f1;border-radius:6px}.callout-icon,.callout-text strong{color:#496451}.callout-text{color:var(--muted)}.today-toolbar .active{background:#1e3231;border-color:#1e3231}.today-time,.today-category,.today-quick-top time{color:#496451}.today-source,.today-quick-card p,.today-full-card p{color:var(--muted)}.today-next{border-color:var(--line);color:var(--text)}.today-project-button{background:#edf3ee;color:#42604d;border-radius:4px}.today-project-button:hover{background:#dee8df}
+.drawer-head,.drawer-footer,.drawer-section,.mile{border-color:var(--line)}.drawer{box-shadow:-12px 0 50px #1e323126}.drawer-section h3,.field label,.drawer-head p,.mile small,.drawer-progress span{color:var(--muted)}.drawer-head h2,.mile strong{color:var(--ink)}.drawer-progress,.xbtn{background:#edf3ee;border-radius:5px}.drawer-progress strong{color:#42634d}.mile{border-radius:5px}.mile input{accent-color:#58794f}.blocker{background:#fcf2ed;border-color:#ead5c9;border-radius:5px;color:#845b4b}.evidence-item{background:#fbfcfb;border-color:var(--line);border-left-color:#8eaa8f;border-radius:5px}.evidence-date{color:#56765b}.evidence-item strong,.item-context-summary{color:var(--ink)}.evidence-item p,.evidence-help{color:var(--muted)}.lan-modal{border-radius:8px;color:var(--ink)}.lan-modal p{color:var(--muted)}.lan-note,.lan-ai-message,.lan-ai-user{background:#f0f5ef;border-color:var(--line);color:var(--text);border-radius:5px}.lan-modal textarea,.lan-modal select,.lan-diff{border-color:var(--line);border-radius:5px}.lan-ai-message strong{color:#60765f}.toast{background:#1e3231;border-radius:5px}.footer{margin-top:31px;border-color:var(--line);color:var(--muted);font-size:11px}
+.focus-page-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:23px}.focus-date{margin:0 0 5px;font-size:12px;color:var(--muted);letter-spacing:.3px}.focus-page-heading h1{font-size:28px;font-weight:800;line-height:1.5;letter-spacing:.5px;margin:0}.focus-title-line{display:block;width:42px;height:3px;background:var(--gold);margin-top:10px}.focus-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr);gap:24px;align-items:start}
+.focus-workbench{background:#1e3231;color:#fff;padding:26px 27px 16px;min-width:0}.focus-workbench-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px;flex-wrap:wrap}.focus-workbench h2{font-size:23px;font-weight:800;color:#fff;letter-spacing:.5px;line-height:1.4;margin:0}.focus-workbench h2>span{color:var(--gold)}.focus-workbench-heading p{font-size:11px;color:#c0cdc5;margin:9px 0 0}.focus-filters{display:flex;gap:5px}.focus-filters button{background:transparent;border:1px solid #4e6257;border-radius:4px;color:#d4ded7;padding:6px 9px;min-height:32px;font-size:11px;white-space:nowrap}.focus-filters button:hover{background:#344a3e}.focus-filters button[aria-pressed=true]{background:var(--gold);color:#1e3231;border-color:var(--gold);font-weight:700}.focus-action{display:flex;gap:13px;align-items:flex-start;width:100%;text-align:left;padding:18px 0;border:0;border-top:1px solid #3c5147;background:transparent;color:#fff;transition:background .15s}.focus-action:hover{background:#2a4036}.focus-priority{flex-shrink:0;font-size:11px;font-weight:700;line-height:22px;padding:0 6px;border-radius:3px;display:inline-block;background:#f8ecd1;color:#825b11}.focus-workbench .focus-priority.p0{background:#46472e;color:#f1c875}.focus-workbench .focus-priority.p1{background:#385245;color:#d3e1d5}.focus-action-copy{flex:1;min-width:0}.focus-action-copy>strong{display:block;font-size:14px;font-weight:700;line-height:1.6;color:#fff}.focus-action-copy>span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:6px;color:#c8d4cc;font-size:12px;line-height:1.7;overflow-wrap:anywhere}.focus-action-meta{flex:0 0 85px;text-align:right;font-size:11px;line-height:1.65}.focus-action-meta>strong{display:block;font-weight:500;color:#e1e8df}.focus-action-meta>span{display:block;font-size:11px;color:#b8c8bb;margin-top:7px}.focus-action-urgent .focus-action-meta>strong{color:#f1c875;font-weight:700}.focus-action-urgent .focus-priority{background:var(--gold)!important;color:#1e3231!important}.focus-more{width:100%;padding:13px 0 2px;background:transparent;border:0;border-top:1px solid #3c5147;text-align:center;color:#eac474;font-size:12px}.focus-more:hover{color:#fff}.focus-empty{padding:24px 0;font-size:13px;line-height:1.9;color:inherit}.focus-empty>span{display:block;font-size:12px;color:var(--muted)}
+.focus-agenda{background:#fff;min-width:0;padding:25px 25px 19px;border:1px solid var(--line)}.focus-agenda-heading{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:14px}.focus-agenda-heading h2{margin:0;font-size:18px;font-weight:800}.focus-agenda-heading>span{font-size:11px;color:var(--muted)}.focus-agenda-day{display:grid;grid-template-columns:64px minmax(0,1fr);gap:15px;padding:23px 0;border-bottom:1px solid var(--line)}.focus-agenda-day:last-child{border-bottom:0}.focus-agenda-date>strong{display:block;color:#946a17;font-size:29px;font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums}.focus-agenda-date>span{display:block;margin-top:7px;font-size:11px;white-space:nowrap;color:var(--muted)}.focus-agenda-events{min-width:0;display:grid;gap:20px}.focus-agenda-event{display:block;width:100%;background:none;border:0;padding:0;text-align:left;color:var(--ink)}.focus-agenda-event:hover>strong{text-decoration:underline;text-underline-offset:3px}.focus-agenda-event>strong{display:block;font-size:13px;line-height:1.7;font-weight:700;overflow-wrap:anywhere}.focus-agenda-kind{display:inline-block;font-size:10px;color:#7a5c22;background:#fbf2df;padding:3px 6px;margin-top:7px;border-radius:3px}.focus-agenda-context{display:block;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.8}.focus-agenda-note{border-top:1px solid var(--line);margin:6px 0 0;padding-top:13px;font-size:11px;line-height:1.8;color:var(--muted)}
+.focus-waiting{margin-top:25px;background:#fff;border:1px solid var(--line);padding:17px 20px;border-radius:5px}.focus-waiting summary{cursor:pointer;font-size:13px;font-weight:700;line-height:1.7}.focus-waiting summary>span:nth-child(2){font-size:11px;color:var(--muted);margin-left:11px;font-weight:400}.focus-waiting-preview{display:block;font-size:11px;font-weight:400;color:var(--muted);margin:5px 0 0 15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.focus-waiting[open] .focus-waiting-preview{display:none}.focus-waiting-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 25px;margin-top:15px}.focus-waiting-list>button{display:flex;align-items:flex-start;gap:10px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:16px 0;color:var(--ink);min-width:0}.focus-waiting-list>button>span:nth-child(2){flex:1;min-width:0}.focus-waiting-list strong{font-size:12px;display:block;font-weight:700}.focus-waiting-list>button>span:nth-child(2)>span{font-size:11px;color:var(--muted);display:block;margin-top:5px;line-height:1.8}.focus-waiting-list>button>span:last-child{color:#8c6a28}.overview-secondary{margin-top:25px;border-top:1px solid var(--line);padding-top:18px}.overview-secondary>summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink)}.overview-secondary>summary>span{font-size:11px;color:var(--muted);font-weight:400;margin-left:11px}.snapshot-statistics{margin-top:15px}.snapshot-statistics summary{cursor:pointer;font-size:12px;color:var(--muted)}.snapshot-statistics .today-totals{margin-top:16px;gap:12px;justify-content:space-between}.snapshot-statistics .today-total{min-width:0;flex:1}.today-total strong{color:var(--ink)}.today-total span{color:var(--muted)}
+[hidden]{display:none!important}
+.mail-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;margin-bottom:12px}.mail-controls .today-toolbar{margin:0;gap:8px}.mail-order{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);white-space:nowrap}.mail-order select{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:5px;padding:8px 10px;min-height:36px}.mail-list-summary{font-size:12px;color:var(--muted);line-height:1.8;margin:0 0 18px}.mail-record-date{display:block;font-size:12px;letter-spacing:0;white-space:nowrap}.mail-record-clock{display:block;font-size:20px}.today-category .small-badge{font-size:10px;padding:2px 5px;letter-spacing:0;margin-right:4px}.today-full-card>div{min-width:0}.today-full-card h3,.today-full-card p,.today-next{overflow-wrap:anywhere}
+.mail-promotion-notice{background:#fbf4e5;border:1px solid #ead9af;border-radius:5px;padding:16px 18px;margin:0 0 18px;color:#715923;font-size:12px;line-height:1.8}.mail-promotion-notice>strong{font-size:13px}.mail-promotion-notice p{margin:5px 0 9px}.mail-promotion-notice ul{padding-left:18px;margin:0}.mail-promotion-notice li+li{margin-top:7px}.mail-promotion-notice a{color:inherit;text-decoration:underline;text-underline-offset:3px}.mail-promotion-notice li>span{display:block;font-size:11px;color:#7c735e}.today-full-card{scroll-margin-top:140px}.today-full-card:target{border-color:#c3973c;box-shadow:0 0 0 2px #e9b44c55}
+@media(max-width:820px){.today-full-card{grid-template-columns:82px minmax(0,1fr)}}
+@media(max-width:600px){.today-full-card{grid-template-columns:1fr}.today-time{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}.today-time time{display:flex;gap:9px;align-items:baseline}.mail-record-clock{font-size:17px}.today-time small{margin:0}.mail-order{margin-left:auto}.mail-controls .today-toolbar .btn{padding:8px 9px}}
+@media(min-width:1600px){.focus-action-copy>strong{font-size:15px}.focus-action-copy>span{font-size:13px}}
+@media(max-width:1000px){.topbar{padding:0 24px}.workspace-nav{justify-content:flex-start;padding:7px 17px;gap:0}.workspace-nav .navbtn{padding:10px 11px;font-size:12px}.focus-layout{grid-template-columns:minmax(0,1.5fr) minmax(270px,1fr);gap:18px}.focus-workbench{padding:23px 20px 14px}.focus-action{gap:9px}.focus-action-meta{flex-basis:73px}.focus-agenda{padding:23px 19px 18px}.focus-agenda-day{grid-template-columns:64px minmax(0,1fr);gap:11px}.focus-agenda-date>strong{font-size:26px}}
+@media(max-width:760px){.atlas-brand{font-size:24px}.atlas-brand:before{top:16px}.topbar{height:auto;min-height:75px;padding:17px 20px;gap:17px;flex-wrap:wrap}.topcontrols{flex-wrap:wrap;gap:8px}.topcontrols .btn{font-size:11px;padding:8px 10px}.workspace-nav .navbtn .navicon,.workspace-nav .navbtn .navcount{display:none!important}.workspace-nav .navbtn{padding:9px 10px}.content{padding:25px 20px 35px}.focus-page-heading h1{font-size:26px}.focus-layout{grid-template-columns:1fr}.focus-workbench{padding:24px 23px 16px}.focus-agenda{padding:24px}.focus-agenda-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}.focus-agenda-day{grid-template-columns:64px minmax(0,1fr)}.focus-agenda-day:last-child{border-bottom:1px solid var(--line)}.focus-waiting-list{grid-template-columns:1fr}}
+@media(max-width:600px){.topbar{padding:15px 16px;gap:14px}.topcontrols .btn:not(.primary){display:inline-flex}.topcontrols #currentDate,.topcontrols .btn[data-global-action="export-json"],#connectionStatus{display:none}.topcontrols{margin-left:auto}.topcontrols [data-lan-action="open-mcp"]{display:inline-flex!important}.workspace-nav{padding:7px 8px;justify-content:flex-start;gap:1px}.workspace-nav .navbtn{display:block;width:auto;line-height:1.6;padding:8px 9px;border-radius:3px}.workspace-nav .navbtn span:not(.navcount):not(.navicon){display:inline!important;font-size:12px}.workspace-nav .navicon{display:none}.content{padding:22px 15px 35px}.main{padding-bottom:0}.focus-page-heading{margin-bottom:20px}.focus-page-heading h1{font-size:25px}.focus-date{font-size:11px}.focus-page-heading>.btn{font-size:11px;padding:8px}.focus-workbench{padding:22px 18px 14px}.focus-action{padding:17px 0;gap:9px}.focus-action-copy>strong{font-size:13px}.focus-action-copy>span{font-size:12px}.focus-action-meta{flex-basis:70px}.focus-agenda{padding:22px 18px}.focus-agenda-list{grid-template-columns:1fr}.focus-waiting{padding:15px}.overview-secondary>summary>span{display:block;margin:6px 0 0 14px}.footer{margin-top:25px}.page-title h1{font-size:25px}.project-grid,.settings-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.topbar{display:block}.topcontrols{margin-top:15px;justify-content:flex-start}.focus-action-meta{flex-basis:60px}.focus-action-copy>strong{font-size:12px}.focus-workbench{padding:20px 14px 12px}.focus-filters button{padding:6px 9px}.focus-page-heading h1{font-size:23px}}
+@media(pointer:coarse){.focus-filters button,.workspace-nav .navbtn{min-height:44px}.focus-agenda-event{min-height:44px}.field input,.field textarea,.field select,.searchbox input{font-size:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.focus-action,.drawer,.toast{transition:none}}
+@media print{.workspace-nav,.focus-filters,.focus-more{display:none!important}.focus-workbench{background:#fff;color:#1e3231;border:1px solid var(--line)}.focus-workbench h2,.focus-action,.focus-action-copy>strong,.focus-action-copy>span,.focus-action-meta>strong,.focus-action-meta>span,.focus-workbench-heading p{color:#1e3231}.focus-layout{grid-template-columns:1.5fr 1fr}.focus-action{break-inside:avoid}.focus-title-line{print-color-adjust:exact}.overview-secondary{display:none}}
+
+</style>
+</head>
+<body>
+<div class="layout">
+
+<div class="main">
+<header class="topbar"><div class="atlas-brand" aria-label="Progress Atlas"><span>Progress Atlas</span></div><div class="breadcrumbs">个人工作台 <span>/</span> <strong id="crumb">今日焦点</strong></div><div class="topcontrols"><span class="todaychip" id="connectionStatus" aria-live="polite">连接中…</span><span class="todaychip" id="currentDate"></span><button class="btn" type="button" data-lan-action="open-ai">AI 助手</button><button class="btn" type="button" data-lan-action="open-mcp">✉ 刷新邮件</button><button class="btn" data-global-action="export-json">↧ 导出备份</button><button class="btn primary" data-global-action="add">＋ 新增事项</button></div></header>
+<nav class="workspace-nav" aria-label="页面">
+ <button class="navbtn active" data-page="overview"><span class="navicon">◫</span><span>今日焦点</span></button>
+ <button class="navbtn" data-page="today"><span class="navicon">✉</span><span>邮件记录</span><span class="navcount" id="todaySidebarCount">16</span></button>
+ <button class="navbtn" data-page="projects"><span class="navicon">▦</span><span>全部项目</span><span class="navcount" id="sidebarCount">27</span></button>
+ <button class="navbtn" data-page="timeline"><span class="navicon">⌁</span><span>时间线</span></button>
+ <button class="navbtn" data-page="actions"><span class="navicon">☑</span><span>行动清单</span></button>
+ <button class="navbtn" data-page="activity"><span class="navicon">◷</span><span>更新记录</span></button>
+ <button class="navbtn" data-page="settings"><span class="navicon">⚙</span><span>数据与设置</span></button>
+ </nav>
+<div class="content">
+<section class="view active" id="view-overview" aria-label="今日焦点">
+  <div class="focus-page-heading"><div><p class="focus-date" id="focusDate"></p><h1>现在最重要的</h1><span class="focus-title-line" aria-hidden="true"></span></div><button class="btn" type="button" data-navigate="actions">全部行动 ↗</button></div>
+  <div class="focus-layout">
+    <section class="focus-workbench" aria-labelledby="focusHeading">
+      <header class="focus-workbench-heading"><div><h2 id="focusHeading">优先<span>行动</span></h2><p id="focusSummary" aria-live="polite"></p></div><div class="focus-filters" role="group" aria-label="重点事项优先级"><button type="button" data-focus-priority="all" aria-pressed="true">P0 ＋ P1</button><button type="button" data-focus-priority="P0" aria-pressed="false">P0</button><button type="button" data-focus-priority="P1" aria-pressed="false">P1</button></div></header>
+      <div id="focusActions" class="focus-actions"></div>
+      <button type="button" class="focus-more" id="focusMore" data-focus-expand hidden></button>
+    </section>
+    <aside class="focus-agenda" aria-labelledby="agendaHeading"><header class="focus-agenda-heading"><h2 id="agendaHeading">近期节点</h2><span>未来 30 天 · 德国时间</span></header><div id="focusAgenda" class="focus-agenda-list"></div><p class="focus-agenda-note">确认日程和手动计划分开标记；点击节点查看依据。</p></aside>
+  </div>
+  <details class="focus-waiting" id="focusWaitingSection"><summary><span>等待外部反馈</span><span id="focusWaitingCount"></span><span class="focus-waiting-preview" id="focusWaitingPreview"></span></summary><div id="focusWaiting" class="focus-waiting-list"></div></details>
+  <details class="overview-secondary"><summary>项目概况与历史进展 <span>查看统计、里程碑与重点项目</span></summary>
+    <section class="section"><div class="section-heading"><h2>当前项目概况</h2></div><div class="metrics" id="metrics"></div></section>
+    <div class="section overview-charts"><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">事项类型分布</div><div class="chart-sub">按当前项目记录统计</div></div></div><div id="categoryChart" class="bar-group"></div></div><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">工作流状态</div><div class="chart-sub">等待、待核实和持续跟踪分开统计</div></div></div><div class="donut-wrapper"><div class="donut" id="statusDonut"><div class="donut-center"><strong id="donutNumber"></strong><span>事项总数</span></div></div><div class="legend" id="donutLegend"></div></div></div></div>
+    <div class="section split"><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">已记录里程碑</div><div class="chart-sub">仅统计带明确日期且已确认的节点</div></div></div><div id="monthChart" class="chart-months"></div></div><div class="card chartcard"><div class="chart-top"><div><div class="chart-title">最近确认的进展</div><div class="chart-sub">从项目里程碑汇集</div></div><button class="linklike" data-navigate="activity">完整记录 ↗</button></div><div class="recent-list" id="recentUpdates"></div></div></div>
+    <div class="section"><div class="section-heading"><h2>重点项目</h2><button class="linklike" data-navigate="projects">查看全部 ↗</button></div><div class="project-grid" id="overviewProjects"></div></div>
+  </details>
+</section>
+
+
+<section class="view" id="view-today">
+ <div class="page-title"><div><h1>邮件更新记录</h1><p>收录10月8日初始快照与后续自动刷新的增量记录；同一个预约合并显示，推广默认隐藏。</p><p id="mailHistoryCheckStatus" aria-live="polite"></p></div><button class="btn" data-navigate="projects">查看全部项目 →</button></div>
+ <div class="mail-controls"><div class="today-toolbar" role="group" aria-label="邮件记录筛选">
+ <button class="btn small active" type="button" data-today-filter="relevant" aria-pressed="true">非推广</button>
+ <button class="btn small" type="button" data-today-filter="action" aria-pressed="false" title="显示 P0 / P1 重点邮件，P0 排在最前">优先处理</button>
+ <button class="btn small" type="button" data-today-filter="all" aria-pressed="false">全部（含推广）</button>
+ </div><label class="mail-order" for="mailTimeOrder">时间排序 <select id="mailTimeOrder" data-filter="todayOrder"><option value="latest">最新在前</option><option value="oldest">最早在前</option></select></label></div>
+ <p class="mail-list-summary" id="mailListSummary" role="status" aria-live="polite"></p>
+ <aside class="mail-promotion-notice" id="mailPromotionNotice" aria-label="已包含的推广邮件" hidden></aside>
+ <div class="today-list" id="todayMailList"></div>
+ <div class="callout"><div class="callout-icon">ⓘ</div><div class="callout-text"><strong>核验范围：</strong>初始快照与后续增量记录合并展示，日期按德国时间显示。记录条数不等于订单、申请或交易数量；外部门户结果及未读取的附件仍待核验。</div></div>
+</section>
+<section class="view" id="view-projects"><div class="page-title"><div><h1>全部项目</h1><p>搜索、筛选并打开详情，可修改里程碑、状态、优先级、备注和截止日期。</p></div><button class="btn primary" data-global-action="add">＋ 新增</button></div><div id="projectFilters"></div><div class="filterhint" id="filterHint"></div><div class="project-grid" id="allProjects"></div></section>
+<section class="view" id="view-timeline"><div class="page-title"><div><h1>六个月时间线</h1><p>从 2026 年 4 月 7 日到 10 月 8 日 · 展示首次记录与最近记录的跨度。</p></div></div><div id="timelineFilters"></div><div class="section-heading" style="margin:18px 0"><div class="tl-key"><span>━ 记录活跃区间</span><span>● 首次记录</span><span>● 最后记录</span></div></div><div class="timeline-card"><div class="tl-inner"><div class="tl-header"><div class="tl-heading">事项</div><div class="tl-months"><div class="tl-month">4 月</div><div class="tl-month">5 月</div><div class="tl-month">6 月</div><div class="tl-month">7 月</div><div class="tl-month">8 月</div><div class="tl-month">9 月</div><div class="tl-month">10 月</div></div></div><div id="timelineRows"></div></div></div><div class="callout"><span class="callout-icon">◷</span><div class="callout-text">本时间线不是项目开始和结束的甘特估算。首尾时间只代表当前对话资料中可追溯到的首次／最近一次记录。未来日程在「行动清单」中。</div></div></section>
+<section class="view" id="view-actions"><div class="page-title"><div><h1>行动清单</h1><p>把多条项目状态汇总成下一步可执行的动作，优先级可在项目详情中修改。</p></div></div><div class="action-tabs" role="group" aria-label="行动筛选"><button class="action-tab active" data-action-filter="all">全部待办</button><button class="action-tab" data-action-filter="urgent">优先 P0</button><button class="action-tab" data-action-filter="14">未来 14 天</button><button class="action-tab" data-action-filter="30">未来 30 天</button><button class="action-tab" data-action-filter="verify">待核实与受阻</button></div><div id="actionSummary" class="filterhint"></div><div class="action-list" id="actionsList"></div></section>
+<section class="view" id="view-activity"><div class="page-title"><div><h1>进展记录</h1><p>按里程碑日期排列：每条仅代表历史可核验记录或你在此看板手动确认的节点。</p></div></div><div id="activityFilters"></div><div class="card activity-card"><div class="event-stack" id="eventStack"></div></div></section>
+<section class="view" id="view-settings"><div class="page-title"><div><h1>数据与设置</h1><p>Mac SQLite 集中保存，局域网设备共享同一份数据；Outlook 邮件每小时自动刷新，德国时间 00:00–06:00 暂停；可随时手动触发。</p></div></div><div class="settings-grid"><div class="card settings-card"><h3>本地 API · AI 助手</h3><p>连接 Mac 上的模型代理，选择模型并测试连接。邮件刷新有新邮件时调用此模型；保存手动进展后也会整理事件上下文。AI 助手在发送问题时调用。</p><div class="lan-actions"><button class="btn primary" type="button" data-lan-action="ai-settings">配置 API / 选择模型</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div></div><div class="card settings-card"><h3>Outlook MCP · 邮件自动刷新</h3><p>每小时检查收件箱、Archive / 存档 / 归档及其子文件夹，以及已发送邮件；模型结合收发往来更新项目和邮件记录。德国时间 00:00–06:00 暂停自动刷新，06:00 恢复；可随时立即刷新。关闭网页不影响后台运行。</p><p id="mcpLastChecked"></p><p id="mailScheduleStatus" aria-live="polite">正在读取计划…</p><button class="btn primary" type="button" data-lan-action="open-mcp">✉ 刷新邮件 / 管理计划</button><button class="btn" type="button" data-lan-action="audit">查看修改历史</button><button class="btn" type="button" data-lan-action="sqlite-backup">备份 SQLite 数据库</button><button class="btn" type="button" data-lan-action="migrate">导入旧版浏览器修改</button><!--__ATLAS_LOGOUT__--></div><div class="card settings-card"><h3>数据来源与精度</h3><details class="snapshot-statistics"><summary>初始邮件快照统计 · 2026年10月8日</summary><div class="today-totals" id="todayTotals"></div><p>相同预约的多封通知合并；统计仅代表初始快照。</p></details><p>快照基准：<b>2026-10-08</b>（Europe/Berlin）<br>追溯窗口：<b>2026-04-07 — 2026-10-08</b><br>依据：历史对话、既有监控任务及 Outlook 电子邮件核对。已读取邮件，但未对接法院、保险理赔系统、BA门户、DevSpace或券商实时数据；附件、外部门户消息未核实。</p><p>百分比 = 项目中“已完成里程碑数 ÷ 当前定义里程碑总数”。它不是执行耗时、申请胜算、投资收益或案件成功概率。持续跟踪不计百分比。</p></div><div class="card settings-card"><h3>共享数据库管理</h3><p>修改自动保存至 Mac 上的 SQLite，共享给同一局域网内访问的设备。可以导出 JSON 备份；不同设备修改同一事项时有版本冲突检测。</p><div><button class="btn primary" data-global-action="export-json">↧ 导出 JSON</button><button class="btn" data-global-action="import">↥ 导入 JSON</button><button class="btn" data-global-action="export-csv">↧ 导出 CSV</button><button class="btn danger" data-global-action="reset">恢复原始快照</button></div><input type="file" id="importInput" accept="application/json,.json" style="display:none"></div><div class="card settings-card"><h3>状态如何理解</h3><ul class="info-list"><li><b>进行中</b>：已开始，后续工作未完成。</li><li><b>等待反馈</b>：关键推进依赖律师／企业／政府／保险等外部响应。</li><li><b>待核实</b>：历史执行已发生，但最新结果或实际持仓未确认。</li><li><b>受阻</b>：存在明确的技术或程序性障碍。</li><li><b>持续跟踪</b>：没有定义的“完成日期”，例如投资研究雷达。</li><li><b>已完成</b>：仅当前定义交付物完结，不等于其他关联项目已完成。</li></ul></div><div class="card settings-card"><h3>关于信息变动</h3><p>如果某事项的数据来自历史某个时间点，之后的实际进展不会自动更新。打开详情后可以修改状态、下一步、事实备注、里程碑。用户手动确认的新事件会明确标记“手动确认”。</p><p id="localSaveInfo" style="font-weight:680;color:#576b91"></p></div></div></section>
+<footer class="footer"><span>PROGRESS ATLAS · 项目进展</span><span>每小时自动检查邮件 · 00:00–06:00 暂停（德国时间） · 支持立即刷新</span></footer>
+</div></div></div>
+<div id="overlay" class="overlay" tabindex="-1"></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="事项详情"><div class="drawer-head" id="drawerHead"></div><div class="drawer-body" id="drawerBody"></div><div class="drawer-footer" id="drawerFooter"></div></aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="lan-modal-backdrop" id="lanBackdrop" hidden><section class="lan-modal" role="dialog" aria-modal="true" aria-labelledby="lanModalTitle"><header><h2 id="lanModalTitle">Outlook 邮件刷新</h2><button class="btn" type="button" data-lan-action="close">关闭</button></header><div id="lanModalBody"></div></section></div>
+<script>/*__SERVER_SNAPSHOT__*/</script>
+<script>
+'use strict';
+const BOOTSTRAP={"schemaVersion":1,"title":"Email Dashboard","snapshotDate":"2026-10-09","windowStart":"2026-04-09","windowEnd":"2026-10-09","timezone":"Europe/Berlin","methodology":"仅根据已读取邮件证据整理；手动编辑优先。","categories":["工作","生活","其他"],"items":[],"dataRevision":"public-empty","todayMailSummary":{"receivedCount":0,"groupedRelevantCount":0,"promotionalCount":0},"todayUpdates":[],"lastInboxUpdate":null};
+const STORAGE_KEY='progress-atlas-six-month-v3';
+const LEGACY_STORAGE_KEY='progress-atlas-six-month-v2';
+const LEGACY_STORAGE_KEY_V1='progress-atlas-six-month-v1';
+const STATUS={rejected:{label:'未入围 / 已结案',color:'#b8737b'},in_progress:{label:'进行中',color:'#7495d9'},waiting:{label:'等待反馈',color:'#d2aa72'},verification:{label:'待核实',color:'#a990cb'},blocked:{label:'受阻',color:'#d57d86'},tracking:{label:'持续跟踪',color:'#4fa99f'},planned:{label:'规划中',color:'#a6b3c7'},done:{label:'已完成',color:'#69ac89'}};
+const STATUS_ORDER=['in_progress','waiting','verification','blocked','tracking','planned','rejected','done'];
+const CATICONS={'法律与行政':'§','车辆与索赔':'◇','职业发展':'⌘','软件与 AI 项目':'⬡','投资与跟踪':'↗','学习与研究':'✳','房产与资产':'⌂','个人事务':'◎','产品与运营':'◆'};
+const PRIORITY={P0:0,P1:1,P2:2,P3:3};
+let model=window.__ATLAS_SERVER__.model;
+let serverRevision=window.__ATLAS_SERVER__.revision;
+let itemVersions=window.__ATLAS_SERVER__.itemRevisions;
+let isSaving=false; let deferredSync=false;
+let state={todayFilter:'relevant',todayOrder:'latest',page:'overview',category:'all',status:'all',priority:'all',sourceFilter:'all',search:'',actionFilter:'all',openId:null};
+let toastTimer=null;
+function copy(obj){return JSON.parse(JSON.stringify(obj))}
+function loadModel(){
+ const fresh=copy(BOOTSTRAP); let previous=null;let previousKey='';
+ for(const key of [STORAGE_KEY,LEGACY_STORAGE_KEY,LEGACY_STORAGE_KEY_V1]){
+  try{const raw=localStorage.getItem(key);if(!raw)continue;const parsed=JSON.parse(raw);
+   if(parsed&&Array.isArray(parsed.items)&&parsed.schemaVersion===1){previous=parsed;previousKey=key;break;}}
+  catch(e){}
+ }
+ // A same-revision stored copy contains current edits; a prior HTML snapshot must never overwrite incoming email facts.
+ if(previous && previousKey===STORAGE_KEY && previous.dataRevision===BOOTSTRAP.dataRevision)return previous;
+ if(!previous)return fresh;
+ const byId=new Map(fresh.items.map(i=>[i.id,i]));
+ for(const old of previous.items){
+  let updated=byId.get(old.id);
+  if(!updated){if(old.id.startsWith('local-') || old.userUpdatedAt){fresh.items.push(old);byId.set(old.id,old);}continue;}
+  if(!old.userUpdatedAt)continue;
+  // User-edited fields remain their own values. Latest Outlook-verified evidence/dates always remain fresh.
+  for(const k of ['title','category','status','priority','mode','deadline','deadlineVerified','next','blocker','notes','tags']){
+   if(Object.prototype.hasOwnProperty.call(old,k))updated[k]=copy(old[k]);
+  }
+  const byText=new Map((updated.milestones||[]).map(m=>[m.text,m]));
+  for(const m of old.milestones||[]){const exist=byText.get(m.text);
+   if(!exist){if(m.certainty==='user'||String(m.source||'').includes('手动')||String(m.source||'').includes('本地')){updated.milestones.push(m);byText.set(m.text,m);}}
+   else if(m.certainty==='user'||String(m.source||'').includes('手动'))Object.assign(exist,m);
+  }
+  updated.userUpdatedAt=old.userUpdatedAt;
+ }
+ fresh.lastSavedAt=previous.lastSavedAt;
+ fresh.migratedFrom=previousKey;
+ fresh.categories=[...new Set([...fresh.categories,...fresh.items.map(x=>x.category)])];
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(fresh));}catch(e){}
+ return fresh;
+}
+function persist(){/* LAN: edits go to SQLite through API */}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function attr(s){return esc(s).replace(/`/g,'&#96;')}
+function ndate(){return todayInBerlin()}
+function dateObj(iso){return new Date(iso+'T00:00:00Z')}
+function daysUntil(date){if(!date)return null;return Math.ceil((dateObj(date)-dateObj(ndate()))/86400000)}
+function dateShort(s){return s?`${Number(s.slice(5,7))}月${Number(s.slice(8,10))}日`:'未设日期'}
+function when(s){return s? s.slice(0,10):''}
+function prettyDate(d){return d?d.replaceAll('-','.'):''}
+function milestonesDone(it){return (it.milestones||[]).filter(x=>x.done).length}
+function progress(it){const n=it.milestones?.length||0;return it.mode==='ongoing'||!n?null:Math.round(milestonesDone(it)*100/n)}
+function stat(it){return STATUS[it.status]||STATUS.verification}
+function isLive(it){return !['done','rejected'].includes(it.status)}
+function verifiedDeadline(it){return !!it.deadline && it.deadlineVerified!==false && isLive(it)}
+function priLabel(it){return it.priority==='P0'?'紧急 · P0':it.priority==='P1'?'重要 · P1':it.priority==='P2'?'常规 · P2':'低 · P3'}
+function sorted(arr){return [...arr].sort((a,b)=>{let p=(PRIORITY[a.priority]??3)-(PRIORITY[b.priority]??3);if(p!==0)return p;let s=(a.status==='blocked'?-2:a.status==='waiting'?-1:0)-(b.status==='blocked'?-2:b.status==='waiting'?-1:0);if(s!==0)return s;return String(b.last).localeCompare(String(a.last))})}
+function filtered(){return sorted(model.items.filter(x=>(state.category==='all'||x.category===state.category)&&(state.status==='all'||x.status===state.status)&&(state.priority==='all'||x.priority===state.priority)&&(state.sourceFilter==='all'||(state.sourceFilter==='today'?(x.mailEvidence||[]).some(e=>e.date===BOOTSTRAP.snapshotDate):(x.mailEvidence||[]).length>0))&&(!state.search||[x.title,x.category,x.status,x.next,x.blocker,x.notes,x.source,...(x.mailEvidence||[]).map(e=>[e.subject,e.summary,e.date].join(' ')),...(x.tags||[])].join(' ').toLowerCase().includes(state.search.toLowerCase()))))}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+function setPage(page){state.page=page;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+page));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let b={overview:'今日焦点',today:'邮件更新记录',projects:'全部项目',timeline:'时间线',actions:'行动清单',activity:'更新记录',settings:'数据与设置'};document.getElementById('crumb').textContent=b[page];window.scrollTo({top:0,behavior:'instant'});render()}
+const TODAY_LABELS={urgent:'安全风险',action:'跟进待办',outcome:'明确结果',operation:'运营动态',info:'信息通知',promotion:'推广忽略'};
+
+
+/* Mail history uses the recorded German calendar date, not sync insertion order. */
+function mailRecordDate(entry, snapshotDate = '') {
+  // The original snapshot entries only stored a time. Their date is the snapshot
+  // date, never the current day or the date of a later background import.
+  const date = entry.date || snapshotDate;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
+  const parsed = new Date(date + 'T00:00:00Z');
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date ? date : '';
+}
+
+function mailRecordSeconds(entry) {
+  const match = String(entry.time || '').match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+  const [hour, minute, second] = match.slice(1).map(value => Number(value || 0));
+  return hour < 24 && minute < 60 && second < 60 ? hour * 3600 + minute * 60 + second : null;
+}
+
+function mailRecordPriority(entry, items = []) {
+  const priority = entry.priority || items.find(item => item.id === entry.projectId)?.priority;
+  return /^P[0-3]$/.test(priority) ? priority : entry.kind === 'urgent' ? 'P0' : 'P2';
+}
+
+function mailRecordTitle(entry) {
+  return entry.kind === 'promotion' ? String(entry.title || '').replace(/（已排除）/g, '') : entry.title;
+}
+
+function selectMailRecords(entries, { filter = 'relevant', order = 'latest', snapshotDate = '', items = [] } = {}) {
+  const direction = order === 'oldest' ? 1 : -1;
+  return entries.filter(entry => {
+    if (filter === 'all') return true;
+    if (entry.kind === 'promotion') return false;
+    return filter !== 'action' || ['P0', 'P1'].includes(mailRecordPriority(entry, items));
+  }).sort((a, b) => {
+    if (filter === 'action') {
+      const priorityOrder = mailRecordPriority(a, items).localeCompare(mailRecordPriority(b, items));
+      if (priorityOrder) return priorityOrder;
+    }
+    const aDate = mailRecordDate(a, snapshotDate), bDate = mailRecordDate(b, snapshotDate);
+    // Unknown dates/times stay after dated records in either direction.
+    if (!aDate || !bDate) return Number(!aDate) - Number(!bDate);
+    const dateOrder = aDate.localeCompare(bDate);
+    if (dateOrder) return direction * dateOrder;
+    const aTime = mailRecordSeconds(a), bTime = mailRecordSeconds(b);
+    if (aTime === null || bTime === null) return Number(aTime === null) - Number(bTime === null);
+    return direction * (aTime - bTime);
+  });
+}
+
+function todayCard(entry) {
+  const date = mailRecordDate(entry, model.snapshotDate || BOOTSTRAP.snapshotDate);
+  const time = mailRecordSeconds(entry) === null ? '' : entry.time;
+  const priority = mailRecordPriority(entry, model.items);
+  const direction = entry.direction === 'sent' ? ' · 已发送' : entry.direction === 'received' ? ' · 收到' : '';
+  return `<article id="mail-record-${attr(entry.id)}" class="today-full-card ${entry.kind === 'urgent' ? 'urgent' : ''} ${entry.kind === 'promotion' ? 'today-promotional' : ''}" data-mail-id="${attr(entry.id)}" data-mail-date="${attr(date)}" data-mail-time="${attr(time)}" data-mail-priority="${priority}"><div class="today-time"><time${date ? ` datetime="${attr(date + (time ? 'T' + time : ''))}"` : ''}><span class="mail-record-date">${esc(date || '日期未记录')}</span>${time ? `<span class="mail-record-clock">${esc(time)}</span>` : ''}</time><small>德国时间${esc(direction)}</small></div><div><div class="today-category"><span class="small-badge ${priority.toLowerCase()}">${priority}</span> ${esc(entry.kind === 'promotion' ? '推广邮件' : TODAY_LABELS[entry.kind] || '邮件记录')} · ${esc(entry.count || 1)} 封原始邮件</div><h3>${esc(mailRecordTitle(entry))}</h3><p>${esc(entry.detail)}</p>${entry.action ? `<div class="today-next"><strong>下一步：</strong>${esc(entry.action)}</div>` : ''}<div class="today-source">Outlook · ${esc(date || '日期未记录')} · ${esc(entry.sourceSubject)}</div>${entry.projectId ? `<button type="button" class="today-project-button" data-open="${attr(entry.projectId)}">打开对应项目 ↗</button>` : ''}</div></article>`;
+}
+
+function renderToday() {
+  const all = model.todayUpdates || [];
+  const options = { order: state.todayOrder || 'latest', snapshotDate: model.snapshotDate || BOOTSTRAP.snapshotDate, items: model.items };
+  const labels = { relevant: '非推广', action: '优先处理', all: '全部' };
+  const counts = {};
+  document.querySelectorAll('[data-today-filter]').forEach(button => {
+    const filter = button.dataset.todayFilter;
+    counts[filter] = selectMailRecords(all, { ...options, filter }).length;
+    button.textContent = `${labels[filter]} ${counts[filter]} 条${filter === 'all' ? '（含推广）' : ''}`;
+    const selected = filter === state.todayFilter;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  const records = selectMailRecords(all, { ...options, filter: state.todayFilter });
+  document.getElementById('mailTimeOrder').value = options.order;
+  const timeOrder = options.order === 'oldest' ? '最早在前' : '最新在前';
+  document.getElementById('mailListSummary').textContent = `${state.todayFilter === 'action' ? '优先处理 · 先 P0，再 P1' : state.todayFilter === 'all' ? '全部邮件（含推广）' : '邮件记录（不含推广）'} · 显示 ${records.length} 条 · ${state.todayFilter === 'action' ? '各优先级内' : ''}${timeOrder} · 德国时间`;
+  const promotions = records.filter(entry => entry.kind === 'promotion');
+  const promotionNotice = document.getElementById('mailPromotionNotice');
+  promotionNotice.hidden = state.todayFilter !== 'all' || !promotions.length;
+  promotionNotice.innerHTML = promotionNotice.hidden ? '' : `<strong>已包含 ${promotions.length} 条推广邮件</strong><p>完整列表仍按邮件时间排列。点击下列邮件可跳到对应记录。</p><ul>${promotions.map(entry => `<li><a href="#${attr(encodeURIComponent('mail-record-' + entry.id))}">${esc(mailRecordTitle(entry))}</a><span>${esc(mailRecordDate(entry, options.snapshotDate))} ${esc(entry.time)}</span></li>`).join('')}</ul>`;
+  document.getElementById('todayMailList').innerHTML = records.length ? records.map(todayCard).join('') : '<div class="empty">当前筛选没有邮件记录。</div>';
+}
+
+
+function metrics(){const n=model.items.length;const active=model.items.filter(isLive).length;const p0=model.items.filter(x=>x.priority==='P0'&&isLive(x)).length;const requires=model.items.filter(x=>['waiting','verification','blocked'].includes(x.status)).length;const coming=model.items.filter(x=>verifiedDeadline(x)&&daysUntil(x.deadline)>=0&&daysUntil(x.deadline)<=30).length;const arr=[['收录事项',n,'全部领域 / 已去重','▦'],['仍在推进',active,'不含已完成交付物','↗'],['紧急优先级',p0,'P0 · 需要先处理','!'],['等待 / 待核实 / 受阻',requires,'外部依赖与证据缺口','◷'],['30 天内确认日程',coming,'仅统计确认过的截止日','◉'],['Outlook 已核实',model.items.filter(x=>(x.mailEvidence||[]).length).length,'仅为证据覆盖，不等于完成','✉']];document.getElementById('metrics').innerHTML=arr.map(x=>`<div class="metric"><div class="metric-label"><span class="metric-icon">${x[3]}</span>${x[0]}</div><div class="metric-value">${x[1]}</div><div class="metric-hint">${x[2]}</div></div>`).join('')}
+function drawCharts(){let total=model.items.length||1,max=Math.max(1,...model.categories.map(c=>model.items.filter(i=>i.category===c).length));document.getElementById('categoryChart').innerHTML=model.categories.map((c,i)=>{const n=model.items.filter(x=>x.category===c).length;let colors=['#6e80d6','#7a9ccd','#84afd2','#7690d0','#70afa8','#93a1db','#b59bd6','#b4a37b','#77a8aa'];return `<div class="bar-row"><span class="bar-row-name">${esc(c)}</span><div class="bar-row-track"><div class="bar-row-fill" style="width:${n/max*100}%;background:${colors[i]}"></div></div><span class="bar-row-count">${n}</span></div>`}).join('');let groups=STATUS_ORDER.map(k=>({key:k,n:model.items.filter(x=>x.status===k).length})).filter(x=>x.n);let pos=0;let segments=groups.map(x=>{let start=pos;pos+=x.n/total*100;return `${STATUS[x.key].color} ${start}% ${pos}%`});document.getElementById('statusDonut').style.background=segments.length?`conic-gradient(${segments.join(',')})`:'#edf1f7';document.getElementById('donutNumber').textContent=model.items.length;document.getElementById('donutLegend').innerHTML=groups.map(x=>`<div class="legend-row"><span class="status-dot" style="background:${STATUS[x.key].color}"></span>${STATUS[x.key].label}<span class="num">${x.n}</span></div>`).join('');const counts=new Array(7).fill(0);model.items.forEach(x=>(x.milestones||[]).forEach(m=>{if(m.done&&m.date&&m.date>='2026-04-07'&&m.date<=model.windowEnd)counts[Number(m.date.slice(5,7))-4]++}));let cm=Math.max(...counts,1);document.getElementById('monthChart').innerHTML=counts.map((n,i)=>`<div class="month-col"><b>${n||'·'}</b><div class="thebar ${n?'':'zero'}" title="${i+4} 月 ${n} 个已记录节点" style="height:${Math.max(5,n/cm*113)}px"></div><small>${i+4} 月</small></div>`).join('')}
+function events(){let ar=[];model.items.forEach(it=>(it.milestones||[]).forEach(m=>{if(m.done&&m.date)ar.push({id:it.id,title:it.title,category:it.category,date:m.date,description:m.text,source:m.source||it.source})}));return ar.sort((a,b)=>b.date.localeCompare(a.date)||a.title.localeCompare(b.title))}
+function renderRecent(){document.getElementById('recentUpdates').innerHTML=events().slice(0,5).map(e=>`<div class="recent-item"><span class="recent-date">${prettyDate(e.date.slice(5))}</span><span class="recent-node"></span><div class="recent-content"><b>${esc(e.description)}</b><span>${esc(e.title)}</span></div></div>`).join('')}
+function card(it){let pr=progress(it),done=milestonesDone(it),total=it.milestones?.length||0;return `<article class="card project-card" role="button" tabindex="0" data-open="${attr(it.id)}" aria-label="查看${attr(it.title)}详情"><div class="project-meta"><span class="category-id"><span class="cat-icon">${CATICONS[it.category]||'◈'}</span>${esc(it.category)}</span><span class="small-badge ${it.priority==='P0'?'p0':it.priority==='P1'?'p1':''}">${it.priority}</span></div><h3 class="project-title">${esc(it.title)}</h3><p class="project-next">${esc(it.next||'尚未设置下一步行动')}</p><div class="project-bottom"><div class="project-statusline"><span class="project-status"><span class="status-dot" style="background:${stat(it).color}"></span>${stat(it).label}</span><span>${pr===null?it.mode==='ongoing'?'持续追踪':'未定义进度':`${pr}% · ${done}/${total} 节点`}</span></div>${pr===null?'<div class="progress-track"><div class="progress-fill" style="width:100%;opacity:.18"></div></div>':`<div class="progress-track"><div class="progress-fill" style="width:${pr}%;background:${pr===100?'#65ae89':'#6781df'}"></div></div>`}<div class="project-footer"><span class="project-tags">${(it.mailEvidence||[]).length?'✉ Outlook · ':''}${esc(it.tags?.slice(0,2).join(' · ')||it.category)}</span><span>最近记录 ${esc(dateShort(it.last))}<span class="project-go"> ↗</span></span></div></div></article>`}
+function filterMarkup(prefix){const catOpts=`<option value="all">全部类别</option>`+model.categories.map(c=>`<option value="${attr(c)}" ${state.category===c?'selected':''}>${esc(c)}</option>`).join('');const sOpts='<option value="all">全部状态</option>'+STATUS_ORDER.map(s=>`<option value="${s}" ${state.status===s?'selected':''}>${STATUS[s].label}</option>`).join('');const pOpts='<option value="all">全部优先级</option>'+['P0','P1','P2','P3'].map(p=>`<option ${state.priority===p?'selected':''} value="${p}">${p}</option>`).join('');return `<div class="filters"><div class="searchbox"><span>⌕</span><input aria-label="搜索项目" data-filter="search" placeholder="搜索事项、下一步、关键词..." value="${attr(state.search)}"></div><select aria-label="分类" data-filter="category">${catOpts}</select><select aria-label="状态" data-filter="status">${sOpts}</select><select aria-label="优先级" data-filter="priority">${pOpts}</select><select aria-label="邮件证据筛选" data-filter="sourceFilter"><option value="all" ${state.sourceFilter==='all'?'selected':''}>全部来源</option><option value="mail" ${state.sourceFilter==='mail'?'selected':''}>✉ 已核验 Outlook</option><option value="today" ${state.sourceFilter==='today'?'selected':''}>✦ 今天收到的邮件</option></select><button class="btn small" data-filter-clear>清空筛选</button></div>`}
+function renderProjects(skipFilters=false){if(!skipFilters)document.getElementById('projectFilters').innerHTML=filterMarkup();let it=filtered();document.getElementById('filterHint').textContent=`显示 ${it.length} / ${model.items.length} 项 · 可筛选“今天收到的邮件” · 点击编辑详情`;document.getElementById('allProjects').innerHTML=it.length?it.map(card).join(''):'<div class="card empty" style="grid-column:1/-1"><div><b>没有符合条件的事项</b><p>试试清空筛选或新增项目</p></div></div>'}
+function getPct(s){const min=dateObj(model.windowStart).getTime(),max=dateObj(model.windowEnd).getTime(),val=dateObj(s||model.windowStart).getTime();return Math.min(100,Math.max(0,(val-min)/(max-min)*100))}
+function renderTimeline(skipFilters=false){if(!skipFilters)document.getElementById('timelineFilters').innerHTML=filterMarkup();let ar=filtered().sort((a,b)=>(a.first||'').localeCompare(b.first||'')||(PRIORITY[a.priority]||0)-(PRIORITY[b.priority]||0));document.getElementById('timelineRows').innerHTML=ar.length?ar.map(x=>{let a=getPct(x.first),b=getPct(x.last),w=Math.max(1.5,b-a);return `<div class="tl-row" data-open="${attr(x.id)}"><div class="tl-name"><span class="status-dot" style="background:${stat(x).color}"></span><b title="${attr(x.title)}">${esc(x.title)}</b></div><div class="tl-dates" title="首次 ${esc(x.first)} · 最近 ${esc(x.last)}"><span class="tl-bar ${x.status}" style="left:${a}%;width:${w}%"></span><span class="tl-start" style="left:calc(${a}% - 7px)"></span><span class="tl-end" style="left:calc(${b}% - 7px)"></span></div></div>`}).join(''):'<div class="empty">当前筛选没有对应事项</div>'}
+function renderActions(){document.querySelectorAll('[data-action-filter]').forEach(e=>e.classList.toggle('active',e.dataset.actionFilter===state.actionFilter));let ar=sorted(model.items.filter(isLive));if(state.actionFilter==='urgent')ar=ar.filter(x=>x.priority==='P0');if(state.actionFilter==='verify')ar=ar.filter(x=>['waiting','verification','blocked'].includes(x.status));if(state.actionFilter==='14'||state.actionFilter==='30'){const max=Number(state.actionFilter);ar=ar.filter(x=>verifiedDeadline(x)&&daysUntil(x.deadline)>=0&&daysUntil(x.deadline)<=max).sort((a,b)=>a.deadline.localeCompare(b.deadline))}document.getElementById('actionSummary').textContent=`${ar.length} 条下一步行动 · 只展示每个项目当前最关键的一条，不把未核实期限当硬截止日`;document.getElementById('actionsList').innerHTML=ar.length?ar.map(it=>{let d=verifiedDeadline(it)?daysUntil(it.deadline):null;return `<div class="action-row" role="button" tabindex="0" data-open="${attr(it.id)}"><div class="action-stripe" style="background:${stat(it).color}"></div><div class="action-info"><strong>${esc(it.title)}</strong><p>${esc(it.next||'请补充下一步行动')}</p><div class="action-small">${esc(it.category)} · ${esc(stat(it).label)} · ${esc(it.priority)}</div></div><div class="action-right"><b>${d!==null?(d<0?'已过期 '+Math.abs(d)+' 天':d===0?'今天':`还有 ${d} 天`):'待安排'}</b><small>${verifiedDeadline(it)?dateShort(it.deadline):'无确认硬截止日'}</small></div></div>`}).join(''):'<div class="card empty"><div><b>这一筛选下没有确认的行动</b><p>例如 14 天内没有确认截止日，不代表没有其他重要待办。</p></div></div>'}
+function renderActivity(skipFilters=false){if(!skipFilters)document.getElementById('activityFilters').innerHTML=filterMarkup();const ids=new Set(filtered().map(x=>x.id));let ar=events().filter(x=>ids.has(x.id));document.getElementById('eventStack').innerHTML=ar.length?ar.slice(0,180).map(x=>`<div class="event"><span class="event-date">${esc(dateShort(x.date))}</span><strong>${esc(x.description)}</strong><p>${esc(x.title)}</p><small>${esc(x.source||'历史对话')}</small></div>`).join(''):'<div class="empty">没有带日期的已确认里程碑</div>'}
+function renderSettings(){const sum=model.todayMailSummary||BOOTSTRAP.todayMailSummary;document.getElementById('todayTotals').innerHTML=[['原始收件',sum.receivedCount],['去重有效信息',sum.groupedRelevantCount],['排除推广',sum.promotionalCount]].map(([label,value])=>`<div class="today-total"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('');let el=document.getElementById('localSaveInfo');if(el)el.textContent=`当前 ${model.items.length} 项事项 · Mac SQLite 共享数据库 · ${model.lastSavedAt?'最近修改 '+prettyDate(model.lastSavedAt.slice(0,10)):'尚未修改初始快照'}`}
+function render(){document.getElementById('sidebarCount').textContent=model.items.length;document.getElementById('currentDate').textContent='共享数据库 · '+model.items.length+' 项';document.getElementById('todaySidebarCount').textContent=(model.todayUpdates||[]).filter(e=>e.kind!=='promotion').length;if(state.page==='overview')renderOverview();if(state.page==='today')renderToday();if(state.page==='projects')renderProjects();if(state.page==='timeline')renderTimeline();if(state.page==='actions')renderActions();if(state.page==='activity')renderActivity();if(state.page==='settings')renderSettings()}
+async function updateItem(id,mutate,reDrawDrawer=false){
+ if(isSaving){toast('上一次保存尚未完成');return;}
+ const it=model.items.find(x=>x.id===id);if(!it)return;
+ isSaving=true;const before=copy(it);
+ mutate(it);it.userUpdatedAt=new Date().toISOString();model.lastSavedAt=it.userUpdatedAt;
+ render();if(reDrawDrawer)openDrawer(id);
+ try{const response=await api('/api/items/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({item:it,expectedVersion:itemVersions[id]})});
+  serverRevision=response.revision;itemVersions[id]=response.itemVersion;showNet('数据库已保存');
+  if(response.contextUpdate){toast('已保存，正在整理事件上下文和下一步');loadItemContextStatus(id);}
+ }catch(e){const ix=model.items.findIndex(x=>x.id===id);if(ix>=0)model.items[ix]=before;render();if(reDrawDrawer)openDrawer(id);
+  toast(e.status===409?'⚠ 另一设备已修改此事项；请刷新后重新编辑':'保存失败：'+e.message);showNet('保存失败');deferredSync=true;
+ }finally{isSaving=false;if(deferredSync&&!state.openId)refreshFromServer()}
+}
+function openDrawer(id){const it=model.items.find(x=>x.id===id);if(!it)return;state.openId=id;let pct=progress(it),done=milestonesDone(it),total=it.milestones?.length||0;document.getElementById('drawerHead').innerHTML=`<div><div class="category-id">${esc(it.category)} · ${esc(it.priority)} <span class="status-dot" style="background:${stat(it).color};margin-left:8px"></span> ${esc(stat(it).label)}</div><h2>${esc(it.title)}</h2><p>首次记录 ${esc(it.first)} · 最近资料 ${esc(it.last)}${it.userUpdatedAt?' · 已在共享数据库编辑':''}</p></div><button class="xbtn" data-close aria-label="关闭详情">×</button>`;document.getElementById('drawerBody').innerHTML=`
+ <div class="drawer-section"><div class="drawer-progress"><strong>${pct===null?'—':pct+'%'}</strong><span>${it.mode==='ongoing'?'持续跟踪事项不适用项目完成率。':`已确认 ${done} / ${total} 个定义的里程碑。百分比不是成功概率。`}</span></div></div>
+ <div class="drawer-section"><h3>事件上下文</h3><p class="item-context-summary" id="itemContextSummary">${esc(it.contextSummary||'保存进展后，系统会整理本事件的上下文、当前状态和下一步。')}</p><p class="filterhint" id="itemContextStatus" role="status">正在读取整理状态…</p><button class="btn small" type="button" data-lan-action="item-context-refresh">重新整理当前状态和下一步</button></div>
+ <div class="drawer-section"><h3>项目属性</h3><div class="formgrid"><div class="field span2"><label>事项名称</label><input id="editTitle" maxlength="140" value="${attr(it.title)}"></div><div class="field span2"><label>所属类别</label><select id="editCategory">${model.categories.map(c=>`<option value="${attr(c)}" ${it.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div><div class="field"><label>工作状态</label><select id="editStatus">${STATUS_ORDER.map(s=>`<option value="${s}" ${it.status===s?'selected':''}>${STATUS[s].label}</option>`).join('')}</select></div><div class="field"><label>优先级</label><select id="editPriority">${['P0','P1','P2','P3'].map(s=>`<option ${it.priority===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="field"><label>模式</label><select id="editMode"><option value="project" ${it.mode==='project'?'selected':''}>有界项目（有进度）</option><option value="ongoing" ${it.mode==='ongoing'?'selected':''}>持续监控（无完成率）</option></select></div><div class="field"><label>下一个确认的日程（可留空）</label><input type="date" id="editDeadline" value="${attr(it.deadline||'')}"></div><div class="field span2"><label>下一步行动</label><textarea id="editNext">${esc(it.next||'')}</textarea></div><div class="field span2"><label>阻碍／待核实</label><textarea id="editBlocker">${esc(it.blocker||'')}</textarea></div><div class="field span2"><label>附加备注</label><textarea id="editNotes">${esc(it.notes||'')}</textarea></div></div></div>
+ <div class="drawer-section"><h3>里程碑 · ${done} / ${total} 已完成</h3><div class="milestone-list">${(it.milestones||[]).map((m,index)=>`<label class="mile ${m.done?'completed':''}"><input type="checkbox" data-mile="${index}" ${m.done?'checked':''}><span><strong>${esc(m.text)}</strong><small>${m.date?'日期 '+esc(m.date)+' · ':''}${esc(m.source||'计划节点')}${m.source?.includes('手动')?' · 手动确认':''}</small></span></label>`).join('')||'<div class="filterhint">尚无里程碑。可在下方添加。</div>'}</div><div class="mile-add"><input id="newMilestone" placeholder="新增里程碑，例如：收到保险公司书面回复" maxlength="500"><button class="btn primary small" data-add-mile>添加</button></div><div class="filterhint" style="margin-top:9px">勾选未完成节点时，系统将以当前日期及“局域网手动确认”记录，不会冒充历史来源。</div></div>
+ ${it.blocker?`<div class="drawer-section"><h3>当前风险提示</h3><div class="blocker">${esc(it.blocker)}</div></div>`:''}
+ ${(it.mailEvidence||[]).length?`<div class="drawer-section"><h3>✉ Outlook 邮件证据 · ${it.mailEvidence.length} 条</h3><p class="evidence-help">以邮件日期和主题定位原件；仅记录邮件确认的事实，未审阅的附件和门户消息不视为完成。</p><div class="evidence-list">${it.mailEvidence.map(e=>`<div class="evidence-item"><div class="evidence-date">${esc(e.date)}${e.direction?' · '+(e.direction==='sent'?'已发送':'收到'):''}</div><strong>${esc(e.subject)}</strong><p>${esc(e.summary)}</p></div>`).join('')}</div></div>`:''}
+ <div class="drawer-section"><h3>证据与来源</h3><div style="font-size:11.5px;color:#7b8ca1;line-height:1.85;background:#f8faff;padding:15px;border:1px solid #edf1f7;border-radius:10px">${esc(it.source||'局域网用户新增')}<br>资料最近一次记录：${esc(it.last)}<br>${it.deadline&&it.deadlineVerified===false?'注意：旧到期日是历史配置，未验证最新合约是否持有。':''}</div></div>`;
+ document.getElementById('drawerFooter').innerHTML=`<button class="btn" data-close>返回看板</button><button class="btn primary" data-save-drawer>保存变更</button>`;document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open');document.body.style.overflow='hidden';queueMicrotask(()=>loadItemContextStatus(id));}
+function closeDrawer(){state.openId=null;document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open');document.body.style.overflow=''}
+function saveDrawer(){if(!state.openId)return;const id=state.openId;const form={title:document.getElementById('editTitle').value.trim()||'未命名事项',category:document.getElementById('editCategory').value,status:document.getElementById('editStatus').value,priority:document.getElementById('editPriority').value,mode:document.getElementById('editMode').value,deadline:document.getElementById('editDeadline').value,next:document.getElementById('editNext').value.trim(),blocker:document.getElementById('editBlocker').value.trim(),notes:document.getElementById('editNotes').value.trim()};updateItem(id,it=>{Object.assign(it,form);if(form.deadline)it.deadlineVerified=true},true);toast('正在保存至共享数据库')}
+function addMilestone(){let val=document.getElementById('newMilestone')?.value?.trim();if(!val)return toast('请填写里程碑内容');const id=state.openId;updateItem(id,it=>{it.milestones.push({text:val,done:false,date:'',source:'局域网用户新增',certainty:'user'})},true);toast('正在同步里程碑')}
+function toggleMilestone(idx,checked){const id=state.openId;updateItem(id,it=>{let m=it.milestones[idx];if(!m)return;m.done=checked;if(checked){m.date=ndate();m.source='局域网手动确认';m.certainty='user'}else{m.date='';m.source='用户手动设为待办';m.certainty='user'}},true);toast('正在同步里程碑变更')}
+async function addItem(){
+ if(isSaving){toast('请等待当前保存完成');return;}
+ isSaving=true;
+ const id='local-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);const today=ndate();
+ const it={id,title:'新事项（点击编辑）',category:'软件与 AI 项目',status:'planned',priority:'P2',mode:'project',first:today,last:today,deadline:'',milestones:[],next:'请填写下一步',blocker:'',notes:'',source:'用户在局域网新增',tags:[],userUpdatedAt:new Date().toISOString()};
+ try{const r=await api('/api/items',{method:'POST',body:JSON.stringify({item:it})});model.items.unshift(it);serverRevision=r.revision;itemVersions[id]=r.itemVersion;setPage('projects');openDrawer(id);toast('已保存到共享数据库');}
+ catch(e){toast('新增失败：'+e.message)}
+ finally{isSaving=false;}
+}
+function csvRow(row){return row.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',')}
+function download(name,text,mime='application/json;charset=utf-8'){const file=new Blob([text],{type:mime});const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function exportJSON(){download(`Progress_Atlas_${ndate()}.json`,JSON.stringify(model,null,2),'application/json;charset=utf-8');toast('JSON 备份已导出')}
+function exportCSV(){const heads=['ID','事项','分类','状态','优先级','模式','首次记录','最近记录','截止日','进度百分比','完成节点','总节点','下一步','阻碍','备注','来源'];const rows=model.items.map(it=>[it.id,it.title,it.category,stat(it).label,it.priority,it.mode,it.first,it.last,it.deadline||'',progress(it)??'',milestonesDone(it),it.milestones.length,it.next,it.blocker,it.notes,it.source]);let csv='\uFEFF'+[heads,...rows].map(csvRow).join('\r\n');download(`Progress_Atlas_${ndate()}.csv`,csv,'text/csv;charset=utf-8');toast('CSV 明细已导出')}
+function importJSON(file){if(!file)return;const rd=new FileReader();rd.onload=async()=>{
+  try{const data=JSON.parse(String(rd.result));if(data.schemaVersion!==1||!Array.isArray(data.items))throw Error('数据格式不符合当前版本');
+  if(!confirm(`将用 ${data.items.length} 项替换共享数据库。所有局域网设备都会更新。建议先导出 JSON 备份。继续吗？`))return;
+  const r=await api('/api/import',{method:'POST',body:JSON.stringify({model:data,expectedRevision:serverRevision})});serverRevision=r.revision;
+  await refreshFromServer(true);closeDrawer();setPage('overview');toast('已导入共享数据库');
+ }catch(e){toast('导入失败：'+e.message)}};rd.readAsText(file,'utf-8')}
+async function reset(){if(!confirm('确定让所有设备恢复到初始快照？这会覆盖 SQLite 中的全部修改。请先导出 JSON 备份。'))return;
+ try{const r=await api('/api/reset',{method:'POST',body:JSON.stringify({expectedRevision:serverRevision})});serverRevision=r.revision;
+ await refreshFromServer(true);closeDrawer();setPage('overview');toast('已重置共享数据库');}
+ catch(e){toast('重置失败：'+e.message)}
+}
+function globalAction(name){if(name==='add')addItem();else if(name==='export-json')exportJSON();else if(name==='export-csv')exportCSV();else if(name==='import'){let f=document.getElementById('importInput');f.value='';f.click()}else if(name==='reset')reset()}
+document.addEventListener('click',e=>{let t=e.target.closest('[data-page]');if(t){setPage(t.dataset.page);return}t=e.target.closest('[data-navigate]');if(t){setPage(t.dataset.navigate);return}t=e.target.closest('[data-today-filter]');if(t){state.todayFilter=t.dataset.todayFilter;renderToday();return}t=e.target.closest('[data-open]');if(t){openDrawer(t.dataset.open);return}t=e.target.closest('[data-close]');if(t){closeDrawer();return}t=e.target.closest('[data-save-drawer]');if(t){saveDrawer();return}t=e.target.closest('[data-add-mile]');if(t){addMilestone();return}t=e.target.closest('[data-global-action]');if(t){globalAction(t.dataset.globalAction);return}t=e.target.closest('[data-filter-clear]');if(t){state.search='';state.status='all';state.priority='all';state.category='all';state.sourceFilter='all';render();return}t=e.target.closest('[data-action-filter]');if(t){state.actionFilter=t.dataset.actionFilter;renderActions();return}});
+document.addEventListener('change',e=>{let t=e.target;if(t.id==='importInput'){importJSON(t.files?.[0]);return}if(t.dataset.mile!==undefined){toggleMilestone(Number(t.dataset.mile),t.checked);return}if(t.dataset.filter){if(t.dataset.filter==='search')return;state[t.dataset.filter]=t.value;render();return}});
+document.addEventListener('input',e=>{let t=e.target;if(t.dataset.filter==='search'){state.search=t.value;if(state.page==='projects')renderProjects(true);else if(state.page==='timeline')renderTimeline(true);else if(state.page==='activity')renderActivity(true);}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.openId)closeDrawer();if(e.key==='Enter'&&e.target.id==='newMilestone')addMilestone();if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-open]')&&!e.target.matches('button')){e.preventDefault();openDrawer(e.target.dataset.open)}});
+document.getElementById('overlay').addEventListener('click',closeDrawer);
+/* Priority overview. Display derives from saved records; no project data is changed here. */
+const focusState = { priority: 'all', expanded: false, day: '' };
+
+function todayInBerlin(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
+  const value = type => parts.find(part => part.type === type).value;
+  return `${value('year')}-${value('month')}-${value('day')}`;
+}
+
+function focusDateEntries(item, today = todayInBerlin()) {
+  const entries = [];
+  const valid = date => /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(dateObj(date).getTime()) && dateObj(date).toISOString().slice(0, 10) === date;
+  if (verifiedDeadline(item) && valid(item.deadline)) {
+    entries.push({ item, date: item.deadline, time: '', label: item.title, kind: 'deadline' });
+  }
+  // Only explicit, unfinished user entries become planned events. Completed milestones
+  // describe past progress; email suggestions and uncertain windows are not appointments.
+  for (const milestone of item.milestones || []) {
+    if (milestone.done || milestone.certainty !== 'user') continue;
+    const text = String(milestone.text || '');
+    if (/待确认|待核实|未确认|尚未|可能|暂定|可选|候选|取消|改期|未定|待定|预计|或|[—–~～至]|\d\s*[-/]\s*\d|日\s*[-/]\s*\d/.test(text)) continue;
+    const match = text.match(/^\s*(?:(20\d{2})年)?(\d{1,2})月(\d{1,2})日(?:\s*(\d{1,2})(?:[:：点时](\d{1,2})?(半)?))?/u);
+    if (!match) continue;
+    const year = match[1] || String(item.last || today).slice(0, 4);
+    const date = `${year}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+    if (!valid(date)) continue;
+    let time = '';
+    if (match[4] !== undefined) {
+      const hour = Number(match[4]);
+      const minute = match[6] ? 30 : Number(match[5] || 0);
+      if (hour > 23 || minute > 59) continue;
+      time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    }
+    entries.push({ item, date, time, label: text, kind: 'plan' });
+  }
+  return entries.filter((entry, index, all) => all.findIndex(other => other.date === entry.date && other.time === entry.time) === index);
+}
+
+function focusSort(items, today = todayInBerlin()) {
+  const score = item => {
+    let value = (PRIORITY[item.priority] ?? 3) * 100;
+    const days = verifiedDeadline(item) ? Math.round((dateObj(item.deadline) - dateObj(today)) / 86400000) : null;
+    if (days !== null && days <= 0) value -= 40;
+    else if (item.status === 'blocked') value -= 30;
+    else if (days !== null && days <= 7) value -= 20;
+    return value;
+  };
+  return [...items].sort((a, b) => score(a) - score(b) || String(b.last || '').localeCompare(String(a.last || '')) || a.title.localeCompare(b.title, 'zh-CN'));
+}
+
+function focusTitle(title) {
+  return String(title || '').replace(/^\s*⚠\s*/, '');
+}
+
+function focusAction(item, today) {
+  const days = verifiedDeadline(item) ? Math.round((dateObj(item.deadline) - dateObj(today)) / 86400000) : null;
+  const due = days === null ? '无确认截止日' : days < 0 ? `已过 ${Math.abs(days)} 天` : days === 0 ? '今天' : dateShort(item.deadline);
+  const urgent = days !== null && days <= 0;
+  return `<button type="button" class="focus-action${urgent ? ' focus-action-urgent' : ''}" data-open="${attr(item.id)}"><span class="focus-priority ${item.priority.toLowerCase()}">${esc(item.priority)}</span><span class="focus-action-copy"><strong>${esc(focusTitle(item.title))}</strong><span>${esc(item.next || '打开项目补充下一步行动')}</span></span><span class="focus-action-meta"><strong>${esc(urgent ? due : stat(item).label)}</strong><span>${esc(urgent ? dateShort(item.deadline) : due)}</span></span></button>`;
+}
+
+function renderFocusAgenda(items, today) {
+  const upcoming = items.flatMap(item => focusDateEntries(item, today))
+    .filter(entry => { const days = Math.round((dateObj(entry.date) - dateObj(today)) / 86400000); return days >= 0 && days <= 30; })
+    .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time) || (PRIORITY[a.item.priority] ?? 3) - (PRIORITY[b.item.priority] ?? 3));
+  const dates = [...new Set(upcoming.map(entry => entry.date))];
+  document.getElementById('focusAgenda').innerHTML = dates.length ? dates.map(date => {
+    const day = dateObj(date);
+    const weekday = new Intl.DateTimeFormat('zh-CN', { timeZone: 'UTC', weekday: 'short' }).format(day);
+    const entries = upcoming.filter(entry => entry.date === date);
+    return `<section class="focus-agenda-day"><time datetime="${date}" class="focus-agenda-date"><strong>${date.slice(8)}</strong><span>${Number(date.slice(5, 7))}月 · ${date === today ? '今天' : esc(weekday)}</span></time><div class="focus-agenda-events">${entries.map(entry => `<button type="button" class="focus-agenda-event" data-open="${attr(entry.item.id)}"><strong>${entry.time ? `${esc(entry.time)} · ` : ''}${esc(focusTitle(entry.item.title))}</strong><span class="focus-agenda-kind">${esc(entry.item.priority)} · ${entry.kind === 'plan' ? '手动计划' : '确认日程'}</span>${entry.kind === 'plan' ? `<span class="focus-agenda-context">${esc(entry.label)}</span>` : ''}</button>`).join('')}</div></section>`;
+  }).join('') : '<div class="focus-empty">未来 30 天暂无已记录节点。<span>没有确定日期的事项仍保留在优先行动中。</span></div>';
+}
+
+function renderFocus() {
+  const today = todayInBerlin();
+  focusState.day = today;
+  const date = dateObj(today);
+  document.getElementById('focusDate').textContent = new Intl.DateTimeFormat('zh-CN', { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }).format(date);
+  const all = model.items.filter(item => isLive(item) && ['P0', 'P1'].includes(item.priority));
+  const items = focusSort(all.filter(item => focusState.priority === 'all' || item.priority === focusState.priority), today);
+  document.querySelectorAll('[data-focus-priority]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.focusPriority === focusState.priority)));
+  const shown = focusState.expanded ? items : items.slice(0, 7);
+  document.getElementById('focusSummary').textContent = `${items.length} 项重点 · 按优先级、时限与阻碍排序`;
+  document.getElementById('focusActions').innerHTML = shown.length ? shown.map(item => focusAction(item, today)).join('') : '<div class="focus-empty">当前优先级没有待办事项。</div>';
+  const more = document.getElementById('focusMore');
+  more.hidden = items.length <= 7;
+  more.textContent = focusState.expanded ? '收起其他重点 ↑' : `展开其余 ${items.length - shown.length} 项重点 ↓`;
+  more.setAttribute('aria-expanded', String(focusState.expanded));
+  renderFocusAgenda(items, today);
+  const waiting = items.filter(item => item.status === 'waiting');
+  document.getElementById('focusWaitingSection').hidden = !waiting.length;
+  document.getElementById('focusWaitingCount').textContent = `${waiting.length} 项`;
+  document.getElementById('focusWaitingPreview').textContent = waiting.slice(0, 3).map(item => focusTitle(item.title)).join(' · ');
+  document.getElementById('focusWaiting').innerHTML = waiting.map(item => `<button type="button" data-open="${attr(item.id)}"><span class="focus-priority ${item.priority.toLowerCase()}">${esc(item.priority)}</span><span><strong>${esc(focusTitle(item.title))}</strong><span>${esc(item.blocker || item.next || '等待后续反馈')}</span></span><span aria-hidden="true">↗</span></button>`).join('');
+}
+
+function renderOverview() {
+  renderFocus();
+  metrics();
+  drawCharts();
+  renderRecent();
+  document.getElementById('overviewProjects').innerHTML = focusSort(model.items.filter(isLive)).slice(0, 6).map(card).join('');
+}
+
+document.addEventListener('click', event => {
+  const priority = event.target.closest('[data-focus-priority]');
+  if (priority) {
+    focusState.priority = priority.dataset.focusPriority;
+    focusState.expanded = false;
+    renderFocus();
+  }
+  if (event.target.closest('[data-focus-expand]')) {
+    focusState.expanded = !focusState.expanded;
+    renderFocus();
+  }
+});
+
+// Keep the German calendar day current without making any model or mail requests.
+setInterval(() => { if (state.page === 'overview' && focusState.day !== todayInBerlin()) renderFocus(); }, 60000);
+
+render();
+</script>
+<script>
+/* Browser controls/status only; Outlook scheduling runs on the Mac backend. */
+async function api(path,options={}){
+ const r=await fetch(path,{credentials:'same-origin',cache:'no-store',...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});
+ if(r.status===401){location.reload();throw Object.assign(new Error('会话已过期，请重新登录'),{status:401})}
+ let obj;try{obj=await r.json()}catch{obj={detail:r.statusText}}
+ if(!r.ok)throw Object.assign(new Error(typeof obj.detail==='string'?obj.detail:'请求失败'),{status:r.status});
+ return obj;
+}
+function showNet(status){const e=document.getElementById('connectionStatus');if(e)e.textContent=status}
+let refreshInProgress=false;
+async function refreshFromServer(force=false){
+ if(refreshInProgress)return;
+ if((state.openId||isSaving)&&!force){deferredSync=true;showNet('其他设备有更新 · 关闭编辑后同步');return}
+ refreshInProgress=true;
+ try{const s=await api('/api/snapshot');
+  if(s.revision!==serverRevision||force){model=s.model;serverRevision=s.revision;itemVersions=s.itemRevisions;closeDrawer();render();updateMcpLast();}
+  deferredSync=false;showNet('已同步 · 版本 '+serverRevision);
+ }catch(e){showNet('同步中断');toast(e.message)}finally{refreshInProgress=false}
+}
+let socket=null,retryMs=1000;
+function connectSocket(){
+ const proto=location.protocol==='https:'?'wss':'ws';socket=new WebSocket(proto+'://'+location.host+'/ws');
+ socket.onopen=()=>{retryMs=1000;showNet('已连接 · 版本 '+serverRevision);refreshFromServer()};
+ socket.onmessage=e=>{try{const obj=JSON.parse(e.data);if(obj.type==='changed'&&obj.revision>serverRevision){if(obj.source==='item_context')syncItemContext(obj.itemId);else refreshFromServer()}}catch{}};
+ socket.onclose=()=>{showNet('实时连接中断 · 正在重连');setTimeout(connectSocket,retryMs);retryMs=Math.min(30000,retryMs*1.6)};
+ socket.onerror=()=>socket.close();
+}
+setInterval(()=>{if(socket?.readyState===WebSocket.OPEN)socket.send('ping');},25000);
+// When returning to a tab, refresh in case WebSocket was suspended during sleep.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshFromServer()});
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]')&&deferredSync)setTimeout(()=>refreshFromServer(),60)});
+function htmlEsc(s){return esc(String(s??''))}
+const modal=document.getElementById('lanBackdrop');
+const modalBody=document.getElementById('lanModalBody');
+let currentProposalToken='';
+function openModal(title,markup){document.getElementById('lanModalTitle').textContent=title;modalBody.innerHTML=markup;modal.hidden=false;}
+function closeModal(){modal.hidden=true;currentProposalToken=''}
+function updateMcpLast(){
+ const last=model.lastInboxUpdate;
+ let stamp=last?.date||'';
+ if(stamp.includes('T')){const date=new Date(stamp);if(!Number.isNaN(date.getTime()))stamp=date.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
+ const label=last?'最近邮件检查：'+stamp+'（德国时间）':'尚无邮件检查记录';
+ for(const id of ['mcpLastChecked','mailCheckStatus','mailHistoryCheckStatus']){const el=document.getElementById(id);if(el)el.textContent=label;}
+}
+let mailStatus=null,mailStatusBusy=false;
+function mailTime(value){if(!value)return '尚无记录';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
+function renderMailStatus(){
+ if(!mailStatus)return;
+ const s=mailStatus,last=s.runs[0];
+ const schedule=s.enabled?(s.quietNow?'夜间暂停中':'每小时自动刷新')+' · 00:00–06:00 暂停 · 下次 '+mailTime(s.nextRunAt)+'（德国时间）':'自动刷新已暂停；仍可立即刷新';
+ const scope='关注范围：'+s.scope.join('、');
+ const setting=document.getElementById('mailScheduleStatus');if(setting)setting.textContent=schedule+' · '+scope;
+ const el=document.getElementById('mailSyncDetails');if(!el)return;
+ el.innerHTML=`<div class="lan-note"><strong>${htmlEsc(schedule)}</strong><br>${htmlEsc(scope)}<br>新增范围从 ${htmlEsc(s.historySince)} 起补查${s.backfillPending?'（分批处理中）':''}<br>最近成功：${htmlEsc(mailTime(s.lastSuccessAt))}<br>全部文件夹已检查至：${htmlEsc(mailTime(s.checkedThrough))}</div>
+ <p role="status">${htmlEsc(last?.message||'尚未运行，点击立即刷新开始。')}${s.running?'…':''}</p>
+ <div class="lan-actions"><button class="btn primary" type="button" data-lan-action="mail-refresh" ${s.running?'disabled':''}>${s.running?'正在刷新…':'立即刷新'}</button><button class="btn" type="button" data-lan-action="mail-schedule">${s.enabled?'暂停自动刷新':'开启每小时刷新'}</button></div>
+ <h3>最近检查记录</h3>${s.runs.length?s.runs.map(r=>`<div class="lan-diff"><strong>${r.status==='success'?'已完成':r.status==='failed'?'失败':'进行中'}</strong> · ${r.trigger==='hourly'?'自动':'手动'} · ${htmlEsc(mailTime(r.started_at))}<p>${htmlEsc(r.message)}</p></div>`).join(''):'<p>尚无检查记录。</p>'}`;
+}
+async function loadMailStatus(){
+ if(mailStatusBusy)return;mailStatusBusy=true;
+ try{mailStatus=await api('/api/outlook/status');renderMailStatus();}
+ catch(e){const el=document.getElementById('mailSyncDetails');if(el)el.textContent=e.message;}
+ finally{mailStatusBusy=false;}
+}
+async function openMcp(){
+ openModal('Outlook 邮件刷新',`<p>Mac 后台每小时检查收件箱、Archive / 存档 / 归档及其子文件夹，以及已发送邮件；自动刷新和立即刷新的范围相同。模型会区分收到的回复与我已发送的申请、回复和催办；已发送不等于对方已确认或事项已完成。德国时间 00:00–06:00 暂停自动刷新，06:00 恢复；手动立即刷新随时可用。关闭网页也会继续运行。没有新邮件时不调用模型。</p><p>邮件检查会向所选模型发送项目摘要和新邮件的部分正文；不读取附件。运行结果和错误会显示在下方。</p><div id="mailSyncDetails" aria-live="polite">正在读取刷新状态…</div>`);
+ await loadMailStatus();
+}
+async function triggerMailRefresh(){
+ const button=document.querySelector('[data-lan-action="mail-refresh"]');if(button)button.disabled=true;
+ try{const result=await api('/api/outlook/refresh',{method:'POST',body:'{}'});toast(result.alreadyRunning?'已有刷新正在进行':'已开始刷新邮件');await loadMailStatus();}
+ catch(e){toast(e.message);if(button?.isConnected)button.disabled=false;}
+}
+async function toggleMailSchedule(){
+ if(!mailStatus)return;
+ try{mailStatus=await api('/api/outlook/schedule',{method:'PUT',body:JSON.stringify({enabled:!mailStatus.enabled})});renderMailStatus();toast(mailStatus.enabled?'已开启每小时刷新':'已暂停自动刷新');}
+ catch(e){toast(e.message);}
+}
+let mailStatusTicks=0;
+setInterval(()=>{mailStatusTicks++;if(!document.hidden&&((!modal.hidden&&document.getElementById('mailSyncDetails'))||mailStatusTicks%6===0))loadMailStatus();},5000);
+async function showAudit(){
+ try{const r=await api('/api/audit?limit=60');openModal('SQLite 数据库修改历史',`<p>历史仅记录操作摘要，不存储完整邮件原文。</p>${r.events.map(x=>`<div class="lan-diff"><small>${htmlEsc(x.changed_at)}</small> · <b>${htmlEsc(x.kind)}</b> · ${htmlEsc(x.item_id)}<p>${htmlEsc(x.details)}</p></div>`).join('')}`)}catch(e){toast(e.message)}
+}
+async function exportDb(){
+ try{const r=await fetch('/api/backup.sqlite3',{credentials:'same-origin'});if(!r.ok)throw Error('下载失败 '+r.status);
+ const url=URL.createObjectURL(await r.blob());const a=document.createElement('a');a.href=url;a.download='Progress_Atlas_SQLite_'+ndate()+'.sqlite3';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('SQLite 一致性备份已下载')}
+ catch(e){toast('备份失败：'+e.message)}
+}
+function legacyImport(){
+ const keys=['progress-atlas-six-month-v3','progress-atlas-six-month-v2','progress-atlas-six-month-v1'];const entries=[];
+ for(const key of keys){try{const raw=localStorage.getItem(key);if(!raw)continue;const obj=JSON.parse(raw);if(obj.items&&Array.isArray(obj.items))entries.push({key,obj});}catch{}}
+ if(!entries.length){openModal('迁移旧浏览器编辑','<p>当前浏览器没有检测到旧版 localStorage 数据。如果你之前在另一个浏览器或设备中修改了旧版，请在那台设备里先导出 JSON，然后使用「数据与设置 → 导入 JSON」功能。</p>');return;}
+ const content=entries.map((x,i)=>`<div class="lan-diff"><p>${htmlEsc(x.key)} · ${x.obj.items.length} 项 · ${htmlEsc(x.obj.lastSavedAt||'未知更新日期')}</p><button class="btn" data-legacy-index="${i}">导出 JSON</button><button class="btn primary" data-legacy-preview="${i}">安全合并用户备注/里程碑</button></div>`).join('');
+ window.__legacyEntries=entries;openModal('旧版浏览器数据迁移',`<p>可以安全合并旧版手动备注、手动里程碑和本地新增事项；已有邮件证据、当前状态不会被覆盖。需要全部替换时才使用「导入 JSON」。</p>${content}<div id="legacyDiff"></div>`)
+}
+let legacyProposalToken='';
+async function showLegacyPreview(data){
+ try{const r=await api('/api/legacy/preview',{method:'POST',body:JSON.stringify({model:data})});legacyProposalToken=r.token;
+  let el=document.getElementById('legacyDiff');if(!el){openModal('旧版手动修改安全合并','<div id="legacyDiff"></div>');el=document.getElementById('legacyDiff')}
+  el.innerHTML=`<div class="lan-note">${htmlEsc(r.notice)}</div><p>${r.items.length} 项备注/里程碑修改；${r.newTitles.length} 个旧版新增项目。</p>${r.items.map(x=>`<div class="lan-diff">${htmlEsc(x.title)} · ${htmlEsc(x.fields.join('、'))}</div>`).join('')}${r.newTitles.map(x=>`<div class="lan-diff">新增：${htmlEsc(x)}</div>`).join('')}<button class="btn primary" data-lan-action="legacy-commit">确认安全合并</button>`;
+ }catch(e){toast('旧版合并预览失败：'+e.message)}
+}
+async function legacyCommit(){if(!legacyProposalToken)return;
+ if(!confirm('确认安全合并手动备注和里程碑？现有 Outlook 邮件记录不会被替换。'))return;
+ try{const r=await api('/api/legacy/commit',{method:'POST',body:JSON.stringify({token:legacyProposalToken})});closeModal();await refreshFromServer(true);toast('安全合并完成：修改 '+r.changed+' 项，新增 '+r.added+' 项')}
+ catch(e){toast('合并失败：'+e.message)}
+}
+const contextFormFields={editTitle:'title',editCategory:'category',editStatus:'status',editPriority:'priority',editMode:'mode',editDeadline:'deadline',editNext:'next',editBlocker:'blocker',editNotes:'notes'};
+function captureContextDraft(){
+ const item=model.items.find(it=>it.id===state.openId),values={};
+ if(item)for(const [id,key] of Object.entries(contextFormFields)){const el=document.getElementById(id);if(el&&el.value!==String(item[key]??''))values[id]=el.value;}
+ const active=document.activeElement;
+ return {values,milestone:document.getElementById('newMilestone')?.value||'',focus:active?.id,selectionStart:active?.selectionStart,selectionEnd:active?.selectionEnd,scroll:document.getElementById('drawerBody')?.scrollTop||0};
+}
+function restoreContextDraft(draft){
+ for(const [id,value] of Object.entries(draft.values)){const el=document.getElementById(id);if(el)el.value=value;}
+ const milestone=document.getElementById('newMilestone');if(milestone)milestone.value=draft.milestone;
+ const active=document.getElementById(draft.focus);if(active){active.focus({preventScroll:true});if(typeof draft.selectionStart==='number'&&['text','textarea'].includes(active.type))active.setSelectionRange(draft.selectionStart,draft.selectionEnd);}
+ const body=document.getElementById('drawerBody');if(body)body.scrollTop=draft.scroll;
+}
+let contextSyncBusy=false,contextStatusBusy=false;
+async function syncItemContext(itemId){
+ if(contextSyncBusy||isSaving)return;
+ if(state.openId&&state.openId!==itemId){deferredSync=true;showNet('项目有更新 · 关闭编辑后同步');return;}
+ contextSyncBusy=true;
+ try{
+  const snapshot=await api('/api/snapshot');
+  if(isSaving)return;
+  if(state.openId&&state.openId!==itemId){deferredSync=true;return;}
+  const openId=state.openId,draft=openId?captureContextDraft():null;
+  model=snapshot.model;serverRevision=snapshot.revision;itemVersions=snapshot.itemRevisions;
+  render();updateMcpLast();deferredSync=false;
+  if(openId){openDrawer(openId);restoreContextDraft(draft);}
+  showNet('事件上下文已同步 · 版本 '+serverRevision);
+ }catch(e){toast('上下文同步失败：'+e.message)}finally{contextSyncBusy=false;}
+}
+async function loadItemContextStatus(itemId=state.openId){
+ if(!itemId||contextStatusBusy||state.openId!==itemId)return;
+ contextStatusBusy=true;
+ try{
+  const status=await api('/api/items/'+encodeURIComponent(itemId)+'/context-status');
+  if(state.openId!==itemId)return;
+  const el=document.getElementById('itemContextStatus');if(el)el.textContent=status.message;
+  const button=document.querySelector('[data-lan-action="item-context-refresh"]');if(button)button.disabled=['queued','running'].includes(status.status);
+  if(status.status==='success'&&status.result_version>itemVersions[itemId])await syncItemContext(itemId);
+ }catch(e){const el=document.getElementById('itemContextStatus');if(state.openId===itemId&&el)el.textContent=e.message;}
+ finally{contextStatusBusy=false;}
+}
+async function refreshItemContext(){
+ const id=state.openId;if(!id)return;
+ const draft=captureContextDraft();if(Object.keys(draft.values).length||draft.milestone.trim())return toast('请先保存变更或添加里程碑，再重新整理');
+ try{await api('/api/items/'+encodeURIComponent(id)+'/refresh-context',{method:'POST',body:'{}'});toast('正在重新整理事件上下文和下一步');await loadItemContextStatus(id);}
+ catch(e){toast(e.message);}
+}
+setInterval(()=>{if(!document.hidden&&state.openId)loadItemContextStatus();},2000);
+// API credentials are write-only in the browser and never enter the shared project model.
+async function openAiSettings(){
+ openModal('本地 API 设置','<p id="aiSettingsLoading">正在读取配置…</p>');
+ try{
+  const config=await api('/api/ai/config');
+  if(!document.getElementById('aiSettingsLoading'))return;
+  openModal('本地 API 设置',`<p>让看板使用这台 Mac 上的模型代理。手机和其他电脑也通过看板使用同一配置。</p>
+  <form id="aiSettingsForm" autocomplete="off">
+   <label for="aiBaseUrl">API 地址</label><input class="lan-input" id="aiBaseUrl" type="url" value="${htmlEsc(config.baseUrl)}" required>
+   <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写代理 API Keys 中的密钥'}">
+   <label for="aiModel">模型</label><input class="lan-input" id="aiModel" list="aiModelList" value="${htmlEsc(config.model)}" placeholder="点击加载模型，或输入模型名"><datalist id="aiModelList"></datalist>
+   <p>密钥只保存在 Mac 后端。请输入 API 密钥；管理页面的登录密码不能用于模型调用。</p>
+   <div class="lan-actions"><button class="btn" type="button" data-lan-action="ai-models">加载模型</button><button class="btn primary" type="submit">保存配置</button><button class="btn" type="button" data-lan-action="ai-test">保存并测试连接</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div>
+   <p>测试连接会调用模型一次，不附带项目数据。</p><div id="aiSettingsStatus" class="lan-note" role="status">${config.configured?'已配置 '+htmlEsc(config.model)+'；可测试连接。':'填写配置后保存。'}</div>
+  </form>`);
+ }catch(e){if(document.getElementById('aiSettingsLoading'))openModal('本地 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
+}
+function aiSettingsStatus(message){const el=document.getElementById('aiSettingsStatus');if(el)el.textContent=message}
+function lockAiSettings(busy){document.querySelectorAll('#aiSettingsForm button').forEach(el=>el.disabled=busy)}
+async function saveAiSettings(){
+ const form=document.getElementById('aiSettingsForm');if(!form)throw Error('请先打开 API 设置');
+ const config=await api('/api/ai/config',{method:'PUT',body:JSON.stringify({baseUrl:form.querySelector('#aiBaseUrl').value,apiKey:form.querySelector('#aiApiKey').value,model:form.querySelector('#aiModel').value})});
+ if(form.isConnected){form.querySelector('#aiApiKey').value='';form.querySelector('#aiApiKey').placeholder='留空保留现有密钥';form.querySelector('#aiBaseUrl').value=config.baseUrl}
+ return config;
+}
+async function runAiSettings(action){
+ lockAiSettings(true);aiSettingsStatus(action==='test'?'正在测试模型连接…':'正在保存配置…');
+ try{
+  const config=await saveAiSettings();
+  if(action==='models'){
+   aiSettingsStatus('正在读取可用模型…');const data=await api('/api/ai/models');
+   const list=document.getElementById('aiModelList');if(list)list.innerHTML=data.models.map(name=>`<option value="${htmlEsc(name)}"></option>`).join('');
+   aiSettingsStatus('已加载 '+data.models.length+' 个模型。点击模型输入框选择，选择后保存。');
+  }else if(action==='test'){
+   const data=await api('/api/ai/test',{method:'POST',body:'{}'});
+   aiSettingsStatus('连接成功 · '+data.model+' · '+(data.latencyMs/1000).toFixed(1)+' 秒');
+  }else aiSettingsStatus('配置已保存'+(config.model?' · '+config.model:'。请选择模型后再次保存。'));
+ }catch(e){aiSettingsStatus(e.message)}finally{lockAiSettings(false)}
+}
+let aiConversation=[],aiRequestBusy=false;
+async function openAi(){
+ openModal('AI 助手','<p id="aiChatLoading">正在读取模型配置…</p>');
+ try{
+  const config=await api('/api/ai/config');
+  if(!document.getElementById('aiChatLoading'))return;
+  if(!config.configured){openModal('AI 助手','<p>请先配置本地 API 地址、密钥和模型。</p><button class="btn primary" type="button" data-lan-action="ai-settings">打开 API 设置</button>');return}
+  openModal('AI 助手',`<p>当前模型：<strong>${htmlEsc(config.model)}</strong>。可以分析已保存的项目；邮件通过每小时自动刷新或「刷新邮件」更新。</p>
+   <div id="aiConversation" class="lan-ai-conversation" role="log" aria-live="polite"></div>
+   <form id="aiChatForm"><label for="aiMessage">你的问题</label><textarea id="aiMessage" maxlength="8000" placeholder="例如：帮我整理这周最优先的三件事" required></textarea>
+   <label class="lan-checkbox"><input id="aiIncludeContext" type="checkbox"> 附上当前项目摘要（发送至代理所用模型，不含邮件原文）</label>
+   <div class="lan-actions"><button class="btn primary" type="submit" ${aiRequestBusy?'disabled':''}>${aiRequestBusy?'正在回复…':'发送'}</button><button class="btn" type="button" data-lan-action="ai-clear" ${aiRequestBusy?'disabled':''}>清空对话</button><button class="btn" type="button" data-lan-action="ai-settings">API 设置</button></div><p>回复仅供参考，不会修改项目。对话只保留在当前页面中。</p><div id="aiChatStatus" role="status"></div></form>`);
+  renderAiConversation();
+ }catch(e){if(document.getElementById('aiChatLoading'))openModal('AI 助手',`<p>${htmlEsc(e.message)}</p>`)}
+}
+function renderAiConversation(){
+ const el=document.getElementById('aiConversation');if(!el)return;
+ el.innerHTML=aiConversation.map(entry=>`<div class="lan-ai-message ${entry.role==='user'?'lan-ai-user':''}"><strong>${entry.role==='user'?'你':'AI 助手'}</strong><div>${htmlEsc(entry.content)}</div></div>`).join('')||'<p>发送问题即可开始；如需分析项目，请勾选附上项目摘要。</p>';
+ el.scrollTop=el.scrollHeight;
+}
+async function sendAiMessage(){
+ if(aiRequestBusy)return;
+ const form=document.getElementById('aiChatForm');if(!form)return;
+ const message=form.querySelector('#aiMessage').value.trim();if(!message)return;
+ const history=aiConversation.slice(-8).map(({role,content})=>({role,content}));
+ const includeContext=form.querySelector('#aiIncludeContext').checked;
+ aiRequestBusy=true;aiConversation.push({role:'user',content:message});renderAiConversation();
+ form.querySelector('#aiMessage').value='';form.querySelectorAll('button').forEach(el=>el.disabled=true);
+ document.getElementById('aiChatStatus').textContent='正在等待模型回复…';
+ try{
+  const data=await api('/api/ai/chat',{method:'POST',body:JSON.stringify({message,history,includeContext})});
+  aiConversation.push({role:'assistant',content:data.reply});
+  aiConversation=aiConversation.slice(-40);
+  const status=document.getElementById('aiChatStatus');if(status)status.textContent='';
+ }catch(e){
+  aiConversation.pop();
+  const draft=document.getElementById('aiMessage');if(draft&&!draft.value)draft.value=message;
+  const status=document.getElementById('aiChatStatus');if(status)status.textContent=e.message;else toast('AI 回复失败：'+e.message);
+ }finally{
+  aiRequestBusy=false;renderAiConversation();
+  document.querySelectorAll('#aiChatForm button').forEach(el=>el.disabled=false);
+  const send=document.querySelector('#aiChatForm button[type="submit"]');if(send)send.textContent='发送';
+ }
+}
+document.addEventListener('submit',async e=>{
+ if(e.target.id==='aiSettingsForm'){e.preventDefault();await runAiSettings('save')}
+ if(e.target.id==='aiChatForm'){e.preventDefault();await sendAiMessage()}
+});
+document.addEventListener('click',async e=>{
+ const preview=e.target.closest('[data-legacy-preview]');if(preview){const info=window.__legacyEntries?.[Number(preview.dataset.legacyPreview)];if(info)await showLegacyPreview(info.obj);return}
+ const old=e.target.closest('[data-legacy-index]');if(old){const info=window.__legacyEntries?.[Number(old.dataset.legacyIndex)];if(info)download('Progress_Atlas_legacy_'+info.key+'.json',JSON.stringify(info.obj,null,2));return}
+ const a=e.target.closest('[data-lan-action]');if(!a)return;
+ switch(a.dataset.lanAction){
+ case 'item-context-refresh':await refreshItemContext();break;
+ case 'open-ai':await openAi();break;
+ case 'ai-settings':await openAiSettings();break;
+ case 'ai-models':await runAiSettings('models');break;
+ case 'ai-test':await runAiSettings('test');break;
+ case 'ai-clear':if(!aiRequestBusy){aiConversation=[];renderAiConversation()}break;
+ case 'open-mcp':await openMcp();break;
+ case 'mail-refresh':await triggerMailRefresh();break;
+ case 'mail-schedule':await toggleMailSchedule();break;
+ case 'close':closeModal();break;
+ case 'audit':await showAudit();break;
+ case 'sqlite-backup':await exportDb();break;
+ case 'migrate':legacyImport();break;
+ case 'legacy-commit':await legacyCommit();break;
+ case 'logout':await api('/api/logout',{method:'POST',body:'{}'});location.reload();break;
+ }
+});
+updateMcpLast();loadMailStatus();connectSocket();
+
+</script>
+</body></html>

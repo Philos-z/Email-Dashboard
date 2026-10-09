@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "title": "Email Dashboard",
+  "snapshotDate": "2026-10-09",
+  "windowStart": "2026-04-09",
+  "windowEnd": "2026-10-09",
+  "timezone": "Europe/Berlin",
+  "methodology": "仅根据已读取邮件证据整理；手动编辑优先。",
+  "categories": [
+    "工作",
+    "生活",
+    "其他"
+  ],
+  "items": [],
+  "dataRevision": "public-empty",
+  "todayMailSummary": {
+    "receivedCount": 0,
+    "groupedRelevantCount": 0,
+    "promotionalCount": 0
+  },
+  "todayUpdates": [],
+  "lastInboxUpdate": null
+}

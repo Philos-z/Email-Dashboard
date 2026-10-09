@@ -1,0 +1,18 @@
+# Private runtime data never belongs in Git
+data/*
+!data/seed.json
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.sqlite*
+*.db
+*.key
+*.pem
+*.log
+backups/
+outputs/
+.DS_Store

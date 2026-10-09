@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "title": "Email Dashboard",
+  "snapshotDate": "2026-10-08",
+  "windowStart": "2026-04-07",
+  "windowEnd": "2026-10-08",
+  "timezone": "Europe/Berlin",
+  "methodology": "仅根据已读取邮件证据整理；手动编辑优先。",
+  "categories": [
+    "工作",
+    "生活",
+    "其他"
+  ],
+  "items": [
+    {
+      "id": "example-1",
+      "title": "Example project 1",
+      "category": "工作",
+      "status": "waiting",
+      "priority": "P1",
+      "mode": "project",
+      "first": "2026-04-07",
+      "last": "2026-10-08",
+      "deadline": "",
+      "milestones": [],
+      "next": "等待书面回复",
+      "blocker": "等待确认",
+      "notes": "",
+      "source": "Synthetic test fixture",
+      "tags": [],
+      "mailEvidence": []
+    },
+    {
+      "id": "example-2",
+      "title": "Example project 2",
+      "category": "工作",
+      "status": "waiting",
+      "priority": "P1",
+      "mode": "project",
+      "first": "2026-04-07",
+      "last": "2026-10-08",
+      "deadline": "",
+      "milestones": [],
+      "next": "等待书面回复",
+      "blocker": "等待确认",
+      "notes": "",
+      "source": "Synthetic test fixture",
+      "tags": [],
+      "mailEvidence": []
+    }
+  ],
+  "dataRevision": "public-empty",
+  "todayMailSummary": {
+    "receivedCount": 0,
+    "groupedRelevantCount": 0,
+    "promotionalCount": 0
+  },
+  "todayUpdates": [],
+  "lastInboxUpdate": null
+}

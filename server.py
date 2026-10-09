@@ -27,6 +27,7 @@ import runtime_settings
 import mail_provider
 import outlook_mcp
 import ai_proxy
+import assistant_chat
 import item_context
 import mail_sync
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
@@ -771,7 +772,8 @@ async def verify_mail(request: Request):
 @app.get("/api/ai/config")
 async def ai_config(request: Request):
     check_auth(request)
-    return {**ai_proxy.public_config(), "automaticCalls": request.app.state.mail_sync.status()['enabled']}
+    return {**ai_proxy.public_config(), "automaticCalls": request.app.state.mail_sync.status()['enabled'],
+            "mailChat": assistant_chat.availability()}
 
 @app.put("/api/ai/config")
 async def ai_save_config(request: Request):
@@ -803,10 +805,12 @@ async def ai_chat(request: Request):
     body = await require_json(request, limit=250_000)
     snapshot = read_snapshot() if isinstance(body, dict) and body.get("includeContext") is True else None
     try:
-        messages = ai_proxy.chat_messages(body, snapshot)
+        ai_proxy.chat_messages(body, snapshot)  # Validate before applying installation preferences.
+        include_mail = body.get("includeMail", assistant_chat.availability()["enabled"])
+        messages = ai_proxy.chat_messages({**body, "includeMail": include_mail}, snapshot)
     except ValueError as e:
         raise HTTPException(400, str(e)) from None
-    return await ai_proxy.complete(ai_proxy.read_config(), messages)
+    return await assistant_chat.reply(ai_proxy.read_config(), messages, include_mail=include_mail)
 
 if __name__=="__main__":
     import uvicorn

@@ -12,15 +12,23 @@ Each installation has one mailbox identity and one model configuration. The dash
 | `GET /api/mail/status` | Enabled/running state, per-folder progress, timezone, recent runs and errors |
 | `POST /api/mail/refresh` | `{}`; returns 202 with a job ID or existing job; requires verified account, model config and explicit model-sharing preference |
 | `PUT /api/mail/schedule` | `{enabled: boolean}`; hourly schedule with 00:00–06:00 quiet period in the selected timezone |
-| `GET /api/ai/config` | `{baseUrl, model, keyConfigured, configured, automaticCalls}`; never returns API key |
+| `GET /api/ai/config` | `{baseUrl, model, keyConfigured, configured, automaticCalls, mailChat: {enabled, reason}}`; never returns API key |
 | `PUT /api/ai/config` | `{baseUrl, apiKey, model}`; blank key preserves saved key only at the same URL |
 | `GET /api/ai/models` | Explicit upstream `GET /models` |
 | `POST /api/ai/test` | Explicit model call, no project context |
-| `POST /api/ai/chat` | `{message, includeContext?: boolean, history?: [{role, content}]}`; no project mutation |
+| `POST /api/ai/chat` | `{message, includeContext?: boolean, includeMail?: boolean, history?: [{role, content}]}`; returns `{reply, model, sources, mailAccess}`; no project mutation |
 
 Validation errors use 400, unauthenticated requests 401, conflicting configuration or project revisions 409. Async mail job failures appear in `status.runs` and do not advance cursors. Credentials and private response snippets are excluded from upstream error messages.
 
-The model endpoint must implement OpenAI-compatible `/models` (optional if entering the model name directly) and `/chat/completions` with `choices[].message.content`. Requests use a Bearer API key, redirects are disabled, and system HTTP proxy environment variables are ignored. Native Anthropic / Gemini request formats require an OpenAI-compatible gateway.
+The model endpoint must implement OpenAI-compatible `/models` (optional if entering the model name directly) and `/chat/completions` with `choices[].message.content`. Mail chat additionally requires function tools: `tools`, `tool_choice`, `choices[].message.tool_calls` and `role: "tool"` messages. Requests use a Bearer API key, redirects are disabled, and system HTTP proxy environment variables are ignored. Native Anthropic / Gemini request formats require an OpenAI-compatible gateway.
+
+### Read-only Outlook assistant
+
+`assistant_chat.py` exposes only `search_outlook_mail`, `list_outlook_mail` and `read_outlook_mail`. The backend maps these to the configured MCP server's `microsoft_outlook_email.search_messages`, `list_messages` and `fetch_message`. It verifies the configured account through `mail_provider.connect` before reading any message, honors `shareWithModel`, and rejects changed settings before sending retrieved content to the model. Gmail live chat is not enabled in this version; Gmail sync and project-summary chat remain available.
+
+`includeContext` defaults to false in the API; the UI selects it and sends project summaries plus `contextSummary`, excluding notes and full evidence. `includeMail` defaults to the installation's `mailChat.enabled`; an explicit true requires a verified Outlook account and model-sharing permission. The UI disables the mail option and shows the reason otherwise. Ordinary chat does not open MCP unless the model requests a mail tool.
+
+Search/list results include up to 6000 characters of body per message. Full reads, intended only for explicit full-body requests, require a source discovered in the same request and are limited to 20000 characters. Pagination uses only returned cursors. Each request is limited to six tool calls, four query rounds, 60 distinct messages and 240 seconds. Sources use stable per-request `M1` labels and validated HTTPS Outlook links; the UI displays query counts, source dates in the installation timezone and pagination warnings. No attachments, mailbox writes, project changes or sync-cursor changes occur. User-triggered queries work during scheduled quiet hours. Chat history remains in page memory.
 
 ## Adapter boundary
 

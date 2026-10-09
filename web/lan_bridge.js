@@ -200,31 +200,47 @@ async function openAi(){
   const config=await api('/api/ai/config');
   if(!document.getElementById('aiChatLoading'))return;
   if(!config.configured){openModal('AI 助手','<p>请先配置本地 API 地址、密钥和模型。</p><button class="btn primary" type="button" data-lan-action="ai-settings">打开 API 设置</button>');return}
-  openModal('AI 助手',`<p>当前模型：<strong>${htmlEsc(config.model)}</strong>。可以分析已保存的项目；邮件通过每小时自动刷新或「刷新邮件」更新。</p>
+  const mailReady=config.mailChat?.enabled===true;
+  openModal('AI 助手',`<p>当前模型：<strong>${htmlEsc(config.model)}</strong>。${mailReady?'可以按问题查询 Outlook 邮件，并结合看板里的事件上下文回答。':htmlEsc(config.mailChat?.reason||'可结合当前项目摘要回答。')}</p>
    <div id="aiConversation" class="lan-ai-conversation" role="log" aria-live="polite"></div>
-   <form id="aiChatForm"><label for="aiMessage">你的问题</label><textarea id="aiMessage" maxlength="8000" placeholder="例如：帮我整理这周最优先的三件事" required></textarea>
-   <label class="lan-checkbox"><input id="aiIncludeContext" type="checkbox"> 附上当前项目摘要（发送至代理所用模型，不含邮件原文）</label>
-   <div class="lan-actions"><button class="btn primary" type="submit" ${aiRequestBusy?'disabled':''}>${aiRequestBusy?'正在回复…':'发送'}</button><button class="btn" type="button" data-lan-action="ai-clear" ${aiRequestBusy?'disabled':''}>清空对话</button><button class="btn" type="button" data-lan-action="ai-settings">API 设置</button></div><p>回复仅供参考，不会修改项目。对话只保留在当前页面中。</p><div id="aiChatStatus" role="status"></div></form>`);
+   <form id="aiChatForm"><label for="aiMessage">你的问题</label><textarea id="aiMessage" maxlength="8000" placeholder="例如：查询最近与项目有关的邮件，告诉我下一步" required></textarea>
+   <label class="lan-checkbox"><input id="aiIncludeMail" type="checkbox" ${mailReady?'checked':'disabled'}> 按需查询 Outlook 邮件（相关正文发送至当前代理模型，不读取附件）</label>
+   <label class="lan-checkbox"><input id="aiIncludeContext" type="checkbox" checked> 附上当前项目摘要和事件上下文（不含备注或完整邮件证据）</label>
+   <div class="lan-actions"><button class="btn primary" type="submit" ${aiRequestBusy?'disabled':''}>${aiRequestBusy?'正在回复…':'发送'}</button><button class="btn" type="button" data-lan-action="ai-clear" ${aiRequestBusy?'disabled':''}>清空对话</button><button class="btn" type="button" data-lan-action="ai-settings">API 设置</button></div><p>回复仅供参考，不会修改项目或邮件。对话只保留在当前页面中；夜间也可主动查询。</p><div id="aiChatStatus" role="status"></div></form>`);
   renderAiConversation();
  }catch(e){if(document.getElementById('aiChatLoading'))openModal('AI 助手',`<p>${htmlEsc(e.message)}</p>`)}
 }
 function renderAiConversation(){
  const el=document.getElementById('aiConversation');if(!el)return;
- el.innerHTML=aiConversation.map(entry=>`<div class="lan-ai-message ${entry.role==='user'?'lan-ai-user':''}"><strong>${entry.role==='user'?'你':'AI 助手'}</strong><div>${htmlEsc(entry.content)}</div></div>`).join('')||'<p>发送问题即可开始；如需分析项目，请勾选附上项目摘要。</p>';
+ el.innerHTML=aiConversation.map(entry=>`<div class="lan-ai-message ${entry.role==='user'?'lan-ai-user':''}"><strong>${entry.role==='user'?'你':'AI 助手'}</strong><div>${htmlEsc(entry.content)}</div>${renderAiMailSources(entry)}</div>`).join('')||'<p>可以直接询问邮件内容、最近往来或项目下一步。助手按需查询，并在回复下方列出实际邮件来源。</p>';
  el.scrollTop=el.scrollHeight;
+}
+function renderAiMailSources(entry){
+ if(entry.role!=='assistant'||!entry.mailAccess)return '';
+ const access=entry.mailAccess,sources=Array.isArray(entry.sources)?entry.sources:[];
+ const status=access.queried?'已通过 Outlook 查询 · '+sources.length+' 封邮件':access.enabled?'本次未查询邮件':'本次已关闭邮件查询';
+ const more=(access.queries||[]).some(query=>query.hasMore)?' · 部分结果还有下一页':'';
+ const links=sources.map(source=>{
+  let url='';try{const parsed=new URL(source.url);if(parsed.protocol==='https:'&&!parsed.username&&!parsed.password&&['outlook.live.com','outlook.office.com','outlook.office365.com'].includes(parsed.hostname))url=parsed.href}catch(e){}
+  const title='['+source.reference+'] '+source.subject;
+  const label=url?`<a href="${htmlEsc(url)}" target="_blank" rel="noopener noreferrer">${htmlEsc(title)} ↗</a>`:htmlEsc(title);
+  return `<li>${label}<small>${htmlEsc(source.date)} · ${source.direction==='sent'?'已发送':'收到'}${source.from?' · '+htmlEsc(source.from):''}${source.truncated?' · 正文片段':''}</small></li>`;
+ }).join('');
+ return `<div class="lan-ai-sources"><p>${htmlEsc(status+more)}</p>${sources.length?`<details><summary>邮件来源（${sources.length}）</summary><ul>${links}</ul></details>`:''}</div>`;
 }
 async function sendAiMessage(){
  if(aiRequestBusy)return;
  const form=document.getElementById('aiChatForm');if(!form)return;
  const message=form.querySelector('#aiMessage').value.trim();if(!message)return;
- const history=aiConversation.slice(-8).map(({role,content})=>({role,content}));
+ const history=aiConversation.slice(-8).map(({role,content,sources})=>({role,content:content.slice(0,25000)+(sources?.length?'\n上轮邮件来源（仅供定位后重新查询）：\n'+sources.slice(0,20).map(source=>'['+source.reference+'] '+source.date+' '+source.subject).join('\n'):'')}));
  const includeContext=form.querySelector('#aiIncludeContext').checked;
+ const includeMail=form.querySelector('#aiIncludeMail').checked;
  aiRequestBusy=true;aiConversation.push({role:'user',content:message});renderAiConversation();
  form.querySelector('#aiMessage').value='';form.querySelectorAll('button').forEach(el=>el.disabled=true);
- document.getElementById('aiChatStatus').textContent='正在等待模型回复…';
+ document.getElementById('aiChatStatus').textContent=includeMail?'正在处理问题；如涉及邮件，将查询 Outlook 后回复…':'正在等待模型回复…';
  try{
-  const data=await api('/api/ai/chat',{method:'POST',body:JSON.stringify({message,history,includeContext})});
-  aiConversation.push({role:'assistant',content:data.reply});
+  const data=await api('/api/ai/chat',{method:'POST',body:JSON.stringify({message,history,includeContext,includeMail})});
+  aiConversation.push({role:'assistant',content:data.reply,sources:data.sources,mailAccess:data.mailAccess});
   aiConversation=aiConversation.slice(-40);
   const status=document.getElementById('aiChatStatus');if(status)status.textContent='';
  }catch(e){

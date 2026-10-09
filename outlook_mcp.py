@@ -99,7 +99,7 @@ class OutlookMCP:
         result = await self.rpc('thread/start', {'ephemeral': True, 'cwd': str(Path(__file__).resolve().parent)})
         self.thread_id = result['thread']['id']
 
-    async def list_watched_folders(self):
+    async def profile(self):
         profile = await self.rpc('mcpServer/tool/call', {
             'threadId': self.thread_id, 'server': 'codex_apps',
             'tool': 'microsoft_outlook_email.get_profile', 'arguments': {},
@@ -107,6 +107,11 @@ class OutlookMCP:
         self.own_address = (profile.get('structuredContent') or {}).get('email')
         if profile.get('isError') or not isinstance(self.own_address, str) or not self.own_address:
             raise OutlookError('无法确认 Outlook 邮箱身份，本次未推进检查位置')
+        return self.own_address
+
+    async def list_watched_folders(self):
+        if not self.own_address:
+            await self.profile()
         result = await self.rpc('mcpServer/tool/call', {
             'threadId': self.thread_id, 'server': 'codex_apps',
             'tool': 'microsoft_outlook_email.list_mail_folders',
@@ -134,6 +139,32 @@ class OutlookMCP:
         if not isinstance(data, dict) or not isinstance(data.get('value'), list):
             raise OutlookError('Outlook MCP 返回的邮件列表格式无效')
         return data
+
+
+    async def _chat_read(self, tool, arguments):
+        # Names are constants in the three wrappers below, never supplied by the model.
+        result = await self.rpc('mcpServer/tool/call', {
+            'threadId': self.thread_id, 'server': 'codex_apps',
+            'tool': 'microsoft_outlook_email.' + tool, 'arguments': arguments,
+        })
+        data = result.get('structuredContent')
+        if result.get('isError') or not isinstance(data, dict):
+            raise OutlookError('Outlook 邮件查询失败，请在 ChatGPT 中检查 Outlook 连接与授权')
+        return data
+
+    async def search_mail(self, query, size=15, from_index=0):
+        return await self._chat_read('search_messages', {
+            'query': query, 'size': size, 'from_index': from_index})
+
+    async def recent_mail(self, folder_id, *, top=15, skip=0, direction='received', unread=False):
+        clock = 'sentDateTime' if direction == 'sent' else 'receivedDateTime'
+        arguments = {'folder_id': folder_id, 'top': top, 'skip': skip, 'order_by': clock + ' desc'}
+        if unread:
+            arguments['filter'] = 'isRead eq false'
+        return await self._chat_read('list_messages', arguments)
+
+    async def read_mail(self, message_id):
+        return await self._chat_read('fetch_message', {'message_id': message_id})
 
 
 @asynccontextmanager

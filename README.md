@@ -17,6 +17,14 @@ Open http://localhost:8765. Automatic email refresh starts paused. Configure the
 
 To require a dashboard password, run `ATLAS_REQUIRE_LOGIN=1 ./start.sh`. The baseline launcher binds to the local network; use `ATLAS_BIND=127.0.0.1 ./start.sh` for local-only access. Keep the dashboard on a trusted network.
 
+## Outlook-aware AI assistant
+
+The top-bar assistant and Data & Settings assistant can now query the connected Outlook mailbox through read-only MCP tools. Enable **按需查询 Outlook 邮件** to search historical correspondence, list recent/unread messages, or request more body content from a discovered message. Replies show actual query counts, source dates, original Outlook links and pagination notices. Ordinary chat does not open MCP unless the model requests a mail tool.
+
+The local model proxy must support OpenAI-compatible function tools (`tools`, `tool_choice`, `tool_calls` and tool-result messages). Only queried body snippets are sent to that model; attachments are not read. Project summaries include event context but exclude notes and full evidence. Mail and project data are treated as untrusted input; no email writes, project changes or sync-cursor changes are exposed through chat.
+
+`POST /api/ai/chat` accepts `{message, history: [], includeContext: true, includeMail: true}` and returns `{reply, model, sources, mailAccess}`. API defaults: `includeContext=false`, `includeMail=true`; both options are selected in the UI. Queries are bounded to six tool calls, four query rounds, 60 distinct messages and 240 seconds. Search/list body snippets are limited to 6000 characters, full reads to 20000. The hourly refresh still pauses from 00:00 to 06:00 Europe/Berlin; user-triggered chat remains available during that period.
+
 ## Development
 
 ```sh

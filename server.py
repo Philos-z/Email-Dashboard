@@ -24,6 +24,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 import ai_proxy
+import assistant_chat
 import item_context
 import mail_sync
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
@@ -732,7 +733,7 @@ async def ai_chat(request: Request):
         messages = ai_proxy.chat_messages(body, snapshot)
     except ValueError as e:
         raise HTTPException(400, str(e)) from None
-    return await ai_proxy.complete(ai_proxy.read_config(), messages)
+    return await assistant_chat.reply(ai_proxy.read_config(), messages, include_mail=body.get("includeMail", True))
 
 if __name__=="__main__":
     import uvicorn

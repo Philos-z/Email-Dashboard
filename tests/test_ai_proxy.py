@@ -54,7 +54,7 @@ def test_secret_stays_private_and_blank_preserves_key(client):
 
 
 @pytest.mark.parametrize('url', [
-    'https://external.example/v1', 'http://127.0.0.1.evil.example/v1',
+    'https://192.168.1.20/v1', 'http://127.0.0.1.evil.example/v1',
     'http://169.254.169.254/v1', 'file:///etc/passwd',
     'http://user:password@127.0.0.1:8317',
     'http://127.0.0.1:8317/management.html#/login',

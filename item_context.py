@@ -9,6 +9,7 @@ import time
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
+import runtime_settings
 import ai_proxy
 
 DEBOUNCE_SECONDS = 1.5
@@ -38,7 +39,7 @@ contextSummary、next、blocker 各不超过350字。不要修改用户备注、
     context['notes'] = str(item.get('notes') or '')[:6000]
     context['milestones'] = item.get('milestones', [])
     context['mailEvidence'] = item.get('mailEvidence', [])[-12:]
-    data = {'currentDateTime': datetime.now(ZoneInfo('Europe/Berlin')).isoformat(timespec='minutes'),
+    data = {'currentDateTime': datetime.now(runtime_settings.zone()).isoformat(timespec='minutes'),
             'changedFields': sorted(changed_fields), 'protectedFields': sorted(protected), 'item': context}
     return [{'role': 'system', 'content': instructions},
             {'role': 'user', 'content': json.dumps(data, ensure_ascii=False)}]
@@ -188,7 +189,7 @@ class ItemContextService:
             item.update(contextSummary=plan['contextSummary'], contextUpdatedAt=host.now(), contextBasedOnVersion=expected_version)
             if item.get('userUpdatedAt'):
                 try:
-                    date = datetime.fromisoformat(item['userUpdatedAt'].replace('Z', '+00:00')).astimezone(ZoneInfo('Europe/Berlin')).date().isoformat()
+                    date = datetime.fromisoformat(item['userUpdatedAt'].replace('Z', '+00:00')).astimezone(runtime_settings.zone()).date().isoformat()
                     item['last'] = max(item.get('last') or '', date)
                 except (ValueError, TypeError):
                     pass

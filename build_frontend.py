@@ -189,5 +189,33 @@ mail_controls='''<div class="mail-controls"><div class="today-toolbar" role="gro
 text,n=re.subn(r'<div class="today-toolbar"[^>]*>.*?</div>', lambda match: mail_controls, text, count=1, flags=re.S)
 assert n==1,('mail controls',n)
 text=text.replace('PROGRESS ATLAS · OUTLOOK MCP · HOURLY SYNC','PROGRESS ATLAS · 项目进展')
+# Public setup copy and dates derive from this installation, never a private snapshot.
+text=text.replace('<h1>六个月时间线</h1><p>从 2026 年 4 月 7 日到 10 月 8 日 · 展示首次记录与最近记录的跨度。</p>', '<h1>项目时间线</h1><p id="timelineRange"></p>')
+text=re.sub(r'<h3>数据来源与精度</h3>.*?</div><div class="card settings-card">', '<h3>数据来源与精度</h3><p>看板从空白数据开始。邮件摘要和项目状态仅依据已读取的邮件与手动记录；收件通知不等于处理完毕，附件和外部门户结果需要另行核实。</p></div><div class="card settings-card">', text, count=1, flags=re.S)
+text=re.sub(r'function renderSettings\(\)\{[^\n]*\}', "function renderSettings(){const el=document.getElementById('localSaveInfo');if(el)el.textContent='当前 '+model.items.length+' 项事项 · 本机 SQLite · '+(model.timezone||'UTC');loadSetupStatus();}", text, count=1)
+# Replace deployment-specific cards rather than naming a particular computer or account.
+text=re.sub(r'<h3>Outlook MCP · 邮件自动刷新</h3><p>.*?</p>', '<h3>邮箱 · 自动刷新</h3><p>支持自己的 Outlook 和 Gmail。后台每小时检查收件箱、存档与已发送邮件；所选时区 00:00–06:00 暂停。自动刷新默认关闭。</p>', text, count=1, flags=re.S)
+text=re.sub(r'<h3>本地 API · AI 助手</h3><p>.*?</p>', '<h3>自己的 API · AI 助手</h3><p>使用自己的 OpenAI 兼容 API 和模型。支持 HTTPS 服务及本机代理；密钥只保存在本机后端。</p>', text, count=1, flags=re.S)
+text=re.sub(r'数据与设置</h1><p>Mac SQLite.*?</p>', '数据与设置</h1><p>连接自己的邮箱、API 和模型，按所选时区整理项目。</p>', text, count=1)
+text=text.replace('<div class="settings-grid">','<div class="settings-grid"><div class="card settings-card"><h3>邮箱与连接</h3><p id="accountSetupStatus">尚未完成设置。</p><button class="btn primary" type="button" data-lan-action="mail-settings">邮箱与 API 设置</button></div>',1)
+text=text.replace('<div class="focus-page-heading">','<aside class="setup-banner" id="setupBanner"><div><strong>从自己的邮箱开始</strong><p>连接 Outlook 或 Gmail，再填写自己的 API 和模型。</p></div><button class="btn primary" type="button" data-lan-action="mail-settings">开始设置 ↗</button></aside><div class="focus-page-heading">',1)
+text=text.replace('未来 30 天 · 德国时间','未来 30 天 · 所选时区')
+text=text.replace('每小时自动检查邮件 · 00:00–06:00 暂停（德国时间） · 支持立即刷新','支持每小时检查邮件 · 00:00–06:00 暂停（所选时区） · 支持立即刷新')
+text=text.replace('本地 API · AI 助手','自己的 API · AI 助手').replace('配置 API / 选择模型','配置自己的 API / 模型')
+text=text.replace('Mac SQLite','本机 SQLite').replace('Mac 的 SQLite','本机的 SQLite').replace('Mac 上的 SQLite','本机的 SQLite')
+text=text.replace('初始快照与后续增量记录合并展示，日期按德国时间显示。','按所选邮箱和时区整理邮件记录。')
+text=text.replace('收录10月8日初始快照与后续自动刷新的增量记录；','收录已同步的邮件记录；')
+text=text.replace('恢复到初始快照','恢复为空白看板').replace('恢复初始快照','恢复空白看板').replace('恢复原始快照','恢复空白看板')
+text=text.replace('Outlook 已核实','邮件证据覆盖').replace('Outlook 邮件刷新','邮箱刷新').replace('已核验 Outlook','有邮件证据').replace('当前对话资料中','当前记录中')
+text=text.replace('e.date===BOOTSTRAP.snapshotDate', 'e.date===ndate()')
+# Six calendar months, including year boundaries, rather than fixed Apr–Oct 2026 bins.
+old="const counts=new Array(7).fill(0);model.items.forEach(x=>(x.milestones||[]).forEach(m=>{if(m.done&&m.date&&m.date>='2026-04-07'&&m.date<=model.windowEnd)counts[Number(m.date.slice(5,7))-4]++}));"
+new="const months=Array.from({length:6},(_,i)=>{const end=dateObj(model.windowEnd);const d=new Date(Date.UTC(end.getFullYear(),end.getMonth()-5+i,1));return d.toISOString().slice(0,7)});const counts=months.map(month=>model.items.reduce((n,x)=>n+(x.milestones||[]).filter(m=>m.done&&String(m.date||'').startsWith(month)).length,0));"
+assert old in text
+text=text.replace(old,new).replace('${i+4} 月', '${months[i]}')
+text=text.replace('function renderTimeline(skipFilters=false){', "function renderTimeline(skipFilters=false){document.getElementById('timelineRange').textContent=model.windowStart+' — '+model.windowEnd+' · 首次与最近记录的跨度';const start=dateObj(model.windowStart).getTime(),end=dateObj(model.windowEnd).getTime();document.querySelector('.tl-months').innerHTML=Array.from({length:7},(_,i)=>'<div class=tl-month>'+new Date(start+(end-start)*i/6).toISOString().slice(0,10)+'</div>').join('');")
+text=text.replace('(val-min)/(max-min)*100','(val-min)/Math.max(1,max-min)*100')
+text=text.replace('let model=window.__ATLAS_SERVER__.model;', 'let model=window.__ATLAS_SERVER__.model;')
+text=text.replace('</head>', '<style>.setup-banner:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;border:1px solid var(--line);background:#e9ecdd;margin-bottom:28px}.setup-banner strong{font-size:18px}.setup-banner p{margin:8px 0 0;line-height:1.7}.setup-banner .btn{white-space:nowrap}@media(max-width:650px){.setup-banner:not([hidden]){align-items:flex-start;flex-direction:column}}.lan-modal summary{cursor:pointer;padding:12px 0}.lan-modal select.lan-input{height:auto}</style></head>',1)
 (root/'web/dashboard_lan.html').write_text(text,'utf-8')
 print('Dashboard built',len(text),'chars')

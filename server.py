@@ -23,6 +23,9 @@ from urllib.parse import urlparse
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
+import runtime_settings
+import mail_provider
+import outlook_mcp
 import ai_proxy
 import item_context
 import mail_sync
@@ -32,10 +35,10 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 ROOT = Path(__file__).resolve().parent
-DATA = ROOT / "data"
+DATA = runtime_settings.DATA
 DB_PATH = DATA / "atlas.sqlite3"
 AUTH_PATH = DATA / "auth.json"
-SEED_PATH = DATA / "seed.json"
+SEED_PATH = None  # Tests may inject a synthetic fixture; new installations start empty.
 DASHBOARD_PATH = ROOT / "web" / "dashboard_lan.html"
 SESSION_SECRET_PATH = DATA / "session.key"
 DB_LOCK = Lock()
@@ -54,7 +57,7 @@ def now():
 
 
 def login_required():
-    return os.getenv("ATLAS_REQUIRE_LOGIN", "0") == "1"
+    return os.getenv("ATLAS_REQUIRE_LOGIN", "1") == "1"
 
 
 def write_private(path: Path, contents: bytes):
@@ -89,11 +92,11 @@ def init_db():
         con.execute("CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY AUTOINCREMENT, changed_at TEXT, kind TEXT, item_id TEXT, details TEXT)")
         r = con.execute("SELECT revision FROM state WHERE id=1").fetchone()
         if r is None:
-            seed = json.loads(SEED_PATH.read_text(encoding="utf-8"))
+            seed = json.loads(SEED_PATH.read_text(encoding="utf-8")) if SEED_PATH else runtime_settings.empty_model()
             validate_model(seed)
             con.execute("INSERT INTO state (id,model,revision) VALUES (1,?,1)", (json.dumps(seed, ensure_ascii=False),))
             con.executemany("INSERT INTO revisions (id,version) VALUES (?,1)", [(it["id"],) for it in seed["items"]])
-            con.execute("INSERT INTO audit(changed_at,kind,item_id,details) VALUES (?,?,?,?)", (now(), "import_seed", "", "首次导入 2026-10-08 快照"))
+            con.execute("INSERT INTO audit(changed_at,kind,item_id,details) VALUES (?,?,?,?)", (now(), "import_seed", "", "创建空白看板"))
     secret()
 
 
@@ -202,7 +205,7 @@ def safe_cookie_response(response, value):
 
 LOGIN_PAGE = """<!doctype html><html lang=zh-CN><meta charset=utf-8><meta name=viewport content='width=device-width, initial-scale=1'>
 <title>Progress Atlas · 私人登录</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#f3f6fa;display:grid;place-items:center;min-height:100vh;color:#20314d;margin:0}.box{background:white;border-radius:20px;padding:40px;max-width:380px;width:85%;box-shadow:0 10px 35px #25345013}h1{font-size:24px;margin:0 0 10px}p{color:#677b93;line-height:1.6}input,button{font:inherit;width:100%;box-sizing:border-box;padding:13px;margin-top:12px;border-radius:10px;border:1px solid #d9e1ee}button{background:#405dc2;color:white;font-weight:700;cursor:pointer}.warn{color:#b94b55}</style>
-<section class=box><h1>🔒 Progress Atlas</h1><p>局域网私人看板 · 所有事项存储在 Mac 的 SQLite 中</p><form id=f><input id=p type=password placeholder='请输入访问密码' required autocomplete=current-password autofocus><button>登录</button></form><p id=msg class=warn></p><small>此部署不包含互联网身份认证或云端同步。</small></section>
+<section class=box><h1>🔒 Progress Atlas</h1><p>局域网私人看板 · 所有事项存储在自己的设备中</p><form id=f><input id=p type=password placeholder='请输入访问密码' required autocomplete=current-password autofocus><button>登录</button></form><p id=msg class=warn></p><small>此部署不包含互联网身份认证或云端同步。</small></section>
 <script>document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('p').value})});if(r.ok)location.href='/';else document.getElementById('msg').textContent='密码错误或登录过于频繁';});</script></html>"""
 
 @asynccontextmanager
@@ -372,7 +375,7 @@ async def put_item(item_id: str, request: Request):
                     else:
                         incoming.pop(key, None)
                 if changed_fields:
-                    today = datetime.now(ZoneInfo('Europe/Berlin')).date().isoformat()
+                    today = datetime.now(runtime_settings.zone()).date().isoformat()
                     incoming['last'] = max(item.get('last') or '', today)
                 model["items"][i] = incoming
                 break
@@ -534,12 +537,17 @@ async def reset(request: Request):
     check_auth(request)
     body=await require_json(request)
     expected=body.get("expectedRevision")
-    seed=json.loads(SEED_PATH.read_text(encoding="utf-8"))
+    seed=json.loads(SEED_PATH.read_text(encoding="utf-8")) if SEED_PATH else runtime_settings.empty_model()
     with DB_LOCK, connect() as con:
         con.execute("BEGIN IMMEDIATE")
         row=con.execute("SELECT revision FROM state WHERE id=1").fetchone()
         if row["revision"]!=expected:
             raise HTTPException(409, "存在其他设备更新，请刷新后重试")
+        if con.execute("SELECT 1 FROM mail_sync_runs WHERE status='running' LIMIT 1").fetchone():
+            raise HTTPException(409, "邮件刷新进行中，请完成后再重置")
+        con.execute('DELETE FROM mail_seen')
+        con.execute('DELETE FROM mail_folder_sync')
+        con.execute('UPDATE mail_sync_config SET enabled=0,cursor=NULL,next_run_at=? WHERE id=1', (mail_sync.next_hour(),))
         r=row["revision"]+1
         update_state(seed,r,con)
         con.execute("DELETE FROM revisions")
@@ -670,16 +678,22 @@ async def outlook_commit(request: Request):
     await broadcast(r)
     return {"ok":True,"revision":r,"changed":len(changed_ids),"added":len(payload.get("newItems",[]))}
 
+@app.get("/api/mail/status")
 @app.get("/api/outlook/status")
 async def outlook_status(request: Request):
     check_auth(request)
     return request.app.state.mail_sync.status()
 
+@app.post("/api/mail/refresh", status_code=202)
 @app.post("/api/outlook/refresh", status_code=202)
 async def outlook_refresh(request: Request):
     check_auth(request)
-    return request.app.state.mail_sync.trigger('manual')
+    try:
+        return request.app.state.mail_sync.trigger('manual')
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
 
+@app.put("/api/mail/schedule")
 @app.put("/api/outlook/schedule")
 async def outlook_schedule(request: Request):
     check_auth(request)
@@ -693,6 +707,66 @@ async def outlook_schedule(request: Request):
 async def health():
     # No data exposure; health is intentionally minimal.
     return {"ok":True}
+
+
+@app.get('/api/mail/config')
+async def mail_config(request: Request):
+    check_auth(request)
+    try:
+        config = runtime_settings.read()
+    except ValueError as exc:
+        raise HTTPException(503, str(exc)) from None
+    with DB_LOCK, connect() as con:
+        locked = bool(con.execute('SELECT 1 FROM mail_folder_sync LIMIT 1').fetchone())
+    return {**config, 'locked': locked}
+
+
+@app.put('/api/mail/config')
+async def save_mail_config(request: Request):
+    check_auth(request)
+    body = await require_json(request, limit=4000)
+    try:
+        incoming = runtime_settings.validate(body)
+        old = runtime_settings.read()
+        with DB_LOCK, connect() as con:
+            if con.execute("SELECT 1 FROM mail_sync_runs WHERE status='running' LIMIT 1").fetchone():
+                raise HTTPException(409, '邮件刷新进行中，请完成后再更改设置')
+            locked = con.execute('SELECT 1 FROM mail_folder_sync LIMIT 1').fetchone()
+            immutable = ('provider', 'email', 'historySince', 'timeZone', 'mcpServer')
+            if locked and any(incoming[k] != old[k] for k in immutable):
+                raise HTTPException(409, '此数据目录已绑定邮箱与同步范围。更换邮箱、时区或起始日期时，请使用新的 ATLAS_DATA_DIR。')
+            same_identity = all(incoming[k] == old[k] for k in ('provider', 'email', 'mcpServer'))
+            incoming['verified'] = bool(same_identity and old['verified'])
+            runtime_settings.write(incoming)
+            con.execute('UPDATE mail_sync_config SET enabled=0,history_since=?,next_run_at=? WHERE id=1',
+                        (incoming['historySince'], mail_sync.next_hour()))
+            row = con.execute('SELECT model,revision FROM state WHERE id=1').fetchone()
+            model = json.loads(row['model']); model['timezone'] = incoming['timeZone']
+            revision = row['revision'] + 1
+            update_state(model, revision, con)
+        await broadcast(revision)
+        return {**incoming, 'locked': bool(locked)}
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
+
+
+@app.post('/api/mail/verify')
+async def verify_mail(request: Request):
+    check_auth(request)
+    try:
+        before = runtime_settings.read()
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
+    if not before['email']:
+        raise HTTPException(400, '请先保存自己的邮箱设置')
+    try:
+        result = await mail_provider.verify(before)
+    except (outlook_mcp.OutlookError, ValueError) as exc:
+        raise HTTPException(400, str(exc)) from None
+    if runtime_settings.read() != before:
+        raise HTTPException(409, '验证期间设置已变化，请重新验证')
+    runtime_settings.write({**before, 'verified': True})
+    return result
 
 @app.get("/api/ai/config")
 async def ai_config(request: Request):

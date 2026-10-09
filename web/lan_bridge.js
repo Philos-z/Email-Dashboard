@@ -38,16 +38,16 @@ function closeModal(){modal.hidden=true;currentProposalToken=''}
 function updateMcpLast(){
  const last=model.lastInboxUpdate;
  let stamp=last?.date||'';
- if(stamp.includes('T')){const date=new Date(stamp);if(!Number.isNaN(date.getTime()))stamp=date.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
- const label=last?'最近邮件检查：'+stamp+'（德国时间）':'尚无邮件检查记录';
+ if(stamp.includes('T')){const date=new Date(stamp);if(!Number.isNaN(date.getTime()))stamp=date.toLocaleString('zh-CN',{timeZone:model.timezone||'UTC',hour12:false});}
+ const label=last?'最近邮件检查：'+stamp+'（'+(model.timezone||'UTC')+'）':'尚无邮件检查记录';
  for(const id of ['mcpLastChecked','mailCheckStatus','mailHistoryCheckStatus']){const el=document.getElementById(id);if(el)el.textContent=label;}
 }
 let mailStatus=null,mailStatusBusy=false;
-function mailTime(value){if(!value)return '尚无记录';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
+function mailTime(value){if(!value)return '尚无记录';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString('zh-CN',{timeZone:model.timezone||'UTC',hour12:false});}
 function renderMailStatus(){
  if(!mailStatus)return;
  const s=mailStatus,last=s.runs[0];
- const schedule=s.enabled?(s.quietNow?'夜间暂停中':'每小时自动刷新')+' · 00:00–06:00 暂停 · 下次 '+mailTime(s.nextRunAt)+'（德国时间）':'自动刷新已暂停；仍可立即刷新';
+ const schedule=s.enabled?(s.quietNow?'夜间暂停中':'每小时自动刷新')+' · 00:00–06:00 暂停 · 下次 '+mailTime(s.nextRunAt)+'（'+(model.timezone||'UTC')+'）':'自动刷新已暂停；仍可立即刷新';
  const scope='关注范围：'+s.scope.join('、');
  const setting=document.getElementById('mailScheduleStatus');if(setting)setting.textContent=schedule+' · '+scope;
  const el=document.getElementById('mailSyncDetails');if(!el)return;
@@ -58,22 +58,23 @@ function renderMailStatus(){
 }
 async function loadMailStatus(){
  if(mailStatusBusy)return;mailStatusBusy=true;
- try{mailStatus=await api('/api/outlook/status');renderMailStatus();}
+ try{mailStatus=await api('/api/mail/status');renderMailStatus();}
  catch(e){const el=document.getElementById('mailSyncDetails');if(el)el.textContent=e.message;}
  finally{mailStatusBusy=false;}
 }
 async function openMcp(){
- openModal('Outlook 邮件刷新',`<p>Mac 后台每小时检查收件箱、Archive / 存档 / 归档及其子文件夹，以及已发送邮件；自动刷新和立即刷新的范围相同。模型会区分收到的回复与我已发送的申请、回复和催办；已发送不等于对方已确认或事项已完成。德国时间 00:00–06:00 暂停自动刷新，06:00 恢复；手动立即刷新随时可用。关闭网页也会继续运行。没有新邮件时不调用模型。</p><p>邮件检查会向所选模型发送项目摘要和新邮件的部分正文；不读取附件。运行结果和错误会显示在下方。</p><div id="mailSyncDetails" aria-live="polite">正在读取刷新状态…</div>`);
+ openModal('邮箱刷新',`<p>后台检查自己的收件箱、存档和已发送邮件。自动刷新每小时运行，所选时区 00:00–06:00 暂停；手动刷新随时可用。新邮件的部分正文及项目摘要会发送至你配置的模型，不读取附件。</p><div class="lan-actions"><button class="btn" data-lan-action="mail-settings">邮箱与 API 设置</button></div><div id="mailSyncDetails" aria-live="polite">正在读取状态…</div>`);
  await loadMailStatus();
 }
+
 async function triggerMailRefresh(){
  const button=document.querySelector('[data-lan-action="mail-refresh"]');if(button)button.disabled=true;
- try{const result=await api('/api/outlook/refresh',{method:'POST',body:'{}'});toast(result.alreadyRunning?'已有刷新正在进行':'已开始刷新邮件');await loadMailStatus();}
+ try{const result=await api('/api/mail/refresh',{method:'POST',body:'{}'});toast(result.alreadyRunning?'已有刷新正在进行':'已开始刷新邮件');await loadMailStatus();}
  catch(e){toast(e.message);if(button?.isConnected)button.disabled=false;}
 }
 async function toggleMailSchedule(){
  if(!mailStatus)return;
- try{mailStatus=await api('/api/outlook/schedule',{method:'PUT',body:JSON.stringify({enabled:!mailStatus.enabled})});renderMailStatus();toast(mailStatus.enabled?'已开启每小时刷新':'已暂停自动刷新');}
+ try{mailStatus=await api('/api/mail/schedule',{method:'PUT',body:JSON.stringify({enabled:!mailStatus.enabled})});renderMailStatus();toast(mailStatus.enabled?'已开启每小时刷新':'已暂停自动刷新');}
  catch(e){toast(e.message);}
 }
 let mailStatusTicks=0;
@@ -155,20 +156,20 @@ async function refreshItemContext(){
 setInterval(()=>{if(!document.hidden&&state.openId)loadItemContextStatus();},2000);
 // API credentials are write-only in the browser and never enter the shared project model.
 async function openAiSettings(){
- openModal('本地 API 设置','<p id="aiSettingsLoading">正在读取配置…</p>');
+ openModal('模型 API 设置','<p id="aiSettingsLoading">正在读取配置…</p>');
  try{
   const config=await api('/api/ai/config');
   if(!document.getElementById('aiSettingsLoading'))return;
-  openModal('本地 API 设置',`<p>让看板使用这台 Mac 上的模型代理。手机和其他电脑也通过看板使用同一配置。</p>
+  openModal('模型 API 设置',`<p>填写自己的 OpenAI 兼容 API 地址、密钥和模型。支持 HTTPS 服务和本机代理。</p>
   <form id="aiSettingsForm" autocomplete="off">
    <label for="aiBaseUrl">API 地址</label><input class="lan-input" id="aiBaseUrl" type="url" value="${htmlEsc(config.baseUrl)}" required>
-   <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写代理 API Keys 中的密钥'}">
+   <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写自己的 API 密钥'}">
    <label for="aiModel">模型</label><input class="lan-input" id="aiModel" list="aiModelList" value="${htmlEsc(config.model)}" placeholder="点击加载模型，或输入模型名"><datalist id="aiModelList"></datalist>
-   <p>密钥只保存在 Mac 后端。请输入 API 密钥；管理页面的登录密码不能用于模型调用。</p>
+   <p>密钥只保存在自己的部署设备中。请输入 API 密钥；管理页面的登录密码不能用于模型调用。</p>
    <div class="lan-actions"><button class="btn" type="button" data-lan-action="ai-models">加载模型</button><button class="btn primary" type="submit">保存配置</button><button class="btn" type="button" data-lan-action="ai-test">保存并测试连接</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div>
    <p>测试连接会调用模型一次，不附带项目数据。</p><div id="aiSettingsStatus" class="lan-note" role="status">${config.configured?'已配置 '+htmlEsc(config.model)+'；可测试连接。':'填写配置后保存。'}</div>
   </form>`);
- }catch(e){if(document.getElementById('aiSettingsLoading'))openModal('本地 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
+ }catch(e){if(document.getElementById('aiSettingsLoading'))openModal('模型 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
 }
 function aiSettingsStatus(message){const el=document.getElementById('aiSettingsStatus');if(el)el.textContent=message}
 function lockAiSettings(busy){document.querySelectorAll('#aiSettingsForm button').forEach(el=>el.disabled=busy)}
@@ -181,7 +182,7 @@ async function saveAiSettings(){
 async function runAiSettings(action){
  lockAiSettings(true);aiSettingsStatus(action==='test'?'正在测试模型连接…':'正在保存配置…');
  try{
-  const config=await saveAiSettings();
+  const config=await saveAiSettings();await loadSetupStatus();
   if(action==='models'){
    aiSettingsStatus('正在读取可用模型…');const data=await api('/api/ai/models');
    const list=document.getElementById('aiModelList');if(list)list.innerHTML=data.models.map(name=>`<option value="${htmlEsc(name)}"></option>`).join('');
@@ -237,6 +238,7 @@ async function sendAiMessage(){
  }
 }
 document.addEventListener('submit',async e=>{
+ if(e.target.id==='mailSettingsForm'){e.preventDefault();await saveMailSettings()}
  if(e.target.id==='aiSettingsForm'){e.preventDefault();await runAiSettings('save')}
  if(e.target.id==='aiChatForm'){e.preventDefault();await sendAiMessage()}
 });
@@ -247,6 +249,8 @@ document.addEventListener('click',async e=>{
  switch(a.dataset.lanAction){
  case 'item-context-refresh':await refreshItemContext();break;
  case 'open-ai':await openAi();break;
+ case 'mail-settings':await openMailSettings();break;
+ case 'mail-verify':await verifyMailSettings();break;
  case 'ai-settings':await openAiSettings();break;
  case 'ai-models':await runAiSettings('models');break;
  case 'ai-test':await runAiSettings('test');break;
@@ -263,3 +267,54 @@ document.addEventListener('click',async e=>{
  }
 });
 updateMcpLast();loadMailStatus();connectSocket();
+loadSetupStatus();
+
+async function loadSetupStatus(){
+ try{
+  const [mail, ai] = await Promise.all([api('/api/mail/config'), api('/api/ai/config')]);
+  const ready = mail.verified && mail.shareWithModel && ai.configured;
+  const banner = document.getElementById('setupBanner');
+  if(banner){banner.hidden=ready;banner.querySelector('p').textContent=mail.email?'邮箱 '+mail.email+' · '+(mail.verified?'已验证':'待验证')+' · '+(ai.configured?'模型已配置':'待配置模型'):'连接自己的 Outlook 或 Gmail，再填写 API 和模型。自动刷新默认暂停。';}
+  const status = document.getElementById('accountSetupStatus');
+  if(status)status.textContent=ready?'设置完成 · '+mail.provider+' · '+mail.email+' · '+mail.timeZone:'尚未完成设置，点击下方按钮开始。';
+ }catch(e){toast(e.message)}
+}
+async function openMailSettings(){
+ openModal('邮箱与 API 设置','<p id="mailSettingsLoading">正在读取设置…</p>');
+ try{
+  const [mail, ai] = await Promise.all([api('/api/mail/config'), api('/api/ai/config')]);
+  if(!document.getElementById('mailSettingsLoading'))return;
+  const locked=mail.locked?'disabled':'';
+  openModal('邮箱与 API 设置',`<p>每人自行部署，数据由自己的设备保存。在本机 Codex / ChatGPT 中连接自己的邮箱后，填写同一个邮箱地址。</p>
+  <form id="mailSettingsForm" autocomplete="off">
+   <label for="mailProvider">邮箱服务</label><select class="lan-input" id="mailProvider" ${locked}><option value="outlook" ${mail.provider==='outlook'?'selected':''}>Outlook</option><option value="gmail" ${mail.provider==='gmail'?'selected':''}>Gmail</option></select>
+   <label for="mailEmail">自己的邮箱地址</label><input class="lan-input" id="mailEmail" type="email" required value="${htmlEsc(mail.email)}" placeholder="you@example.com" ${locked}>
+   <label for="mailTimeZone">时区</label><input class="lan-input" id="mailTimeZone" required value="${htmlEsc(mail.email?mail.timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone)}" placeholder="Asia/Shanghai" ${locked}>
+   <label for="mailHistorySince">从哪一天开始整理邮件</label><input class="lan-input" id="mailHistorySince" type="date" required value="${htmlEsc(mail.historySince)}" max="${ndate()}" ${locked}>
+   <details><summary>高级连接设置</summary><label for="mailMcpServer">Codex 中的 MCP server 名称</label><input class="lan-input" id="mailMcpServer" value="${htmlEsc(mail.mcpServer)}" ${locked}><p>默认 codex_apps；其他 server 需提供文档规定的相同工具和返回格式。</p></details>
+   <label class="lan-checkbox"><input id="mailShareWithModel" type="checkbox" ${mail.shareWithModel?'checked':''}>允许把新邮件的部分正文及项目摘要发送至我配置的模型，用于整理看板。</label>
+   <p>${mail.locked?'此数据目录已经绑定邮箱与同步范围。更换账户请使用新的数据目录。':'连接验证只核对邮箱身份，不读取邮件、不调用模型。'}</p>
+   <div class="lan-actions"><button class="btn primary" type="submit">保存邮箱设置</button><button class="btn" type="button" data-lan-action="mail-verify">保存并验证邮箱</button><button class="btn" type="button" data-lan-action="ai-settings">配置自己的 API / 模型</button></div>
+   <div class="lan-note" id="mailSettingsStatus" role="status">${mail.verified?'邮箱身份已验证':'请保存设置并验证邮箱'} · ${ai.configured?'模型已配置':'模型尚未配置'}。保存邮箱设置后，自动刷新会暂停。</div>
+  </form>`);
+ }catch(e){openModal('邮箱与 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
+}
+async function saveMailSettings(){
+ const form=document.getElementById('mailSettingsForm');if(!form)return false;
+ const message=form.querySelector('#mailSettingsStatus');
+ try{
+  await api('/api/mail/config',{method:'PUT',body:JSON.stringify({provider:form.querySelector('#mailProvider').value,email:form.querySelector('#mailEmail').value,timeZone:form.querySelector('#mailTimeZone').value,historySince:form.querySelector('#mailHistorySince').value,mcpServer:form.querySelector('#mailMcpServer').value,shareWithModel:form.querySelector('#mailShareWithModel').checked})});
+  message.textContent='邮箱设置已保存；自动刷新已暂停。';await loadSetupStatus();await refreshFromServer(true);return true;
+ }catch(e){message.textContent=e.message;return false;}
+}
+async function verifyMailSettings(){
+ const form=document.getElementById('mailSettingsForm');if(!form)return;
+ form.querySelectorAll('button').forEach(b=>b.disabled=true);
+ try{
+  if(!await saveMailSettings())return;
+  const message=document.getElementById('mailSettingsStatus');message.textContent='正在核对邮箱身份…';
+  const result=await api('/api/mail/verify',{method:'POST',body:'{}'});
+  message.textContent='已验证自己的邮箱：'+result.email+'。配置模型后可立即刷新或开启每小时刷新。';await loadSetupStatus();
+ }catch(e){const message=document.getElementById('mailSettingsStatus');if(message)message.textContent=e.message;}
+ finally{if(form.isConnected)form.querySelectorAll('button').forEach(b=>b.disabled=false);}
+}

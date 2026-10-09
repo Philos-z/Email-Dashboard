@@ -1,6 +1,8 @@
 """Authenticated access to a local model proxy for chat and background analysis."""
 from __future__ import annotations
 
+import re
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -8,12 +10,13 @@ import tempfile
 from threading import Lock
 from urllib.parse import urlsplit
 
+import runtime_settings
 import httpx
 from fastapi import HTTPException
 
-CONFIG_PATH = Path(__file__).resolve().parent / "data" / "ai_proxy.json"
+CONFIG_PATH = runtime_settings.DATA / "ai_proxy.json"
 CONFIG_LOCK = Lock()
-DEFAULT_BASE_URL = "http://127.0.0.1:8317/v1"
+DEFAULT_BASE_URL = "https://api.openai.com/v1"
 
 
 def normalize_base_url(value):
@@ -24,15 +27,24 @@ def normalize_base_url(value):
         port = url.port
     except ValueError:
         raise ValueError("API 地址无效") from None
-    # This integration is deliberately local; don't forward credentials through redirects.
-    if (url.scheme not in {"http", "https"}
-            or url.hostname not in {"127.0.0.1", "localhost", "::1"}
-            or url.username is not None or url.password is not None
-            or url.query or url.fragment or url.path.rstrip("/") not in {"", "/v1"}
-            or port == 0):
-        raise ValueError("请输入本机代理地址，例如 http://127.0.0.1:8317/v1")
-    host = "[::1]" if url.hostname == "::1" else "127.0.0.1"
-    return f"{url.scheme}://{host}{':' + str(port) if port else ''}/v1"
+    host = (url.hostname or '').lower()
+    local = host in {'localhost', '127.0.0.1', '::1'}
+    invalid = bool(url.scheme not in {'http', 'https'} or not host
+               or url.username is not None or url.password is not None
+               or url.query or url.fragment or port == 0
+               or (not local and url.scheme != 'https')
+               or host.endswith(('.local', '.internal')) or '..' in url.path
+               or '%' in url.path or not re.fullmatch(r'/[A-Za-z0-9_./-]*|', url.path))
+    try:
+        address = ipaddress.ip_address(host)
+        invalid |= not local and not address.is_global
+    except ValueError:
+        invalid |= not local and '.' not in host
+    if invalid:
+        raise ValueError("API 地址须为公开 HTTPS 地址，或本机 HTTP 代理地址；不能包含凭据、查询参数或片段")
+    host = '[::1]' if host == '::1' else '127.0.0.1' if host == 'localhost' else host
+    path = url.path.rstrip('/') or '/v1'
+    return f"{url.scheme}://{host}{':' + str(port) if port else ''}{path}"
 
 
 def read_config():
@@ -43,7 +55,7 @@ def read_config():
             data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
             return validated_config(data)
         except (OSError, ValueError, TypeError):
-            raise HTTPException(503, "本地 API 配置无法读取，请重新配置") from None
+            raise HTTPException(503, "模型 API 配置无法读取，请重新配置") from None
 
 
 def validated_config(data):
@@ -81,7 +93,7 @@ def save_config(data):
                     raise ValueError("修改 API 地址时请重新输入该代理的密钥")
                 incoming["apiKey"] = old["apiKey"]
         if not incoming["apiKey"]:
-            raise ValueError("请输入代理 API 密钥（不是管理页面密码）")
+            raise ValueError("请输入模型 API 密钥（不是管理页面密码）")
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         fd, path = tempfile.mkstemp(prefix=".ai-proxy-", dir=CONFIG_PATH.parent)
         try:
@@ -103,7 +115,7 @@ def http_client():
 
 async def proxy_request(config, path, payload=None):
     if not config["apiKey"]:
-        raise HTTPException(503, "请先在数据与设置中配置本地 API")
+        raise HTTPException(503, "请先在数据与设置中配置模型 API")
     try:
         async with http_client() as client:
             response = await client.request(
@@ -113,7 +125,7 @@ async def proxy_request(config, path, payload=None):
     except httpx.TimeoutException:
         raise HTTPException(504, "模型响应超时，请稍后重试") from None
     except httpx.RequestError:
-        raise HTTPException(502, "无法连接本地代理，请确认 CLIProxyAPI 正在运行") from None
+        raise HTTPException(502, "无法连接模型 API，请检查地址和网络") from None
     # Never relay upstream error bodies: they can contain credentials or account details.
     if response.status_code in {401, 403}:
         raise HTTPException(502, "代理拒绝了 API 密钥，请检查代理中的 API Keys 设置")

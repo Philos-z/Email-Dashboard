@@ -9,6 +9,7 @@ from test_server import client
 import server
 import mail_sync
 import outlook_mcp
+import mail_provider
 import ai_proxy
 
 
@@ -25,6 +26,8 @@ FOLDERS = [
 
 
 def mock_mailbox(monkeypatch, rows):
+    if not ai_proxy.CONFIG_PATH.exists():
+        ai_proxy.save_config({'baseUrl':'http://localhost:8317/v1', 'apiKey':'synthetic-test-key', 'model':'test-model'})
     calls = []
     folders = rows if isinstance(rows, dict) else {'inbox': rows}
 
@@ -44,7 +47,7 @@ def mock_mailbox(monkeypatch, rows):
     async def connect():
         yield Mailbox()
 
-    monkeypatch.setattr(outlook_mcp, 'connect', connect)
+    monkeypatch.setattr(mail_provider, 'connect', connect)
     return calls
 
 
@@ -223,11 +226,12 @@ def test_new_item_appears_in_mail_records(client, monkeypatch):
 
 
 def test_mcp_failure_keeps_cursor_for_retry(client, monkeypatch):
+    ai_proxy.save_config({'baseUrl':'http://localhost:8317/v1','apiKey':'test-key','model':'test-model'})
     @asynccontextmanager
     async def broken():
         raise outlook_mcp.OutlookError('Outlook 授权失效')
         yield
-    monkeypatch.setattr(outlook_mcp, 'connect', broken)
+    monkeypatch.setattr(mail_provider, 'connect', broken)
     old = client.get('/api/snapshot').json()
     client.post('/api/outlook/refresh')
     status = finish(client)
@@ -373,6 +377,7 @@ def test_same_time_mail_resumes_each_folder_without_loss_or_duplicates(client, m
 
 
 def test_sent_failure_does_not_commit_other_folder_progress(client, monkeypatch):
+    ai_proxy.save_config({'baseUrl':'http://localhost:8317/v1','apiKey':'test-key','model':'test-model'})
     class Mailbox:
         async def list_watched_folders(self):
             return FOLDERS
@@ -385,7 +390,7 @@ def test_sent_failure_does_not_commit_other_folder_progress(client, monkeypatch)
     @asynccontextmanager
     async def connect():
         yield Mailbox()
-    monkeypatch.setattr(outlook_mcp, 'connect', connect)
+    monkeypatch.setattr(mail_provider, 'connect', connect)
     old = client.get('/api/snapshot').json()
     client.post('/api/outlook/refresh')
     status = finish(client)

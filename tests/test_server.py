@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server
 import ai_proxy
+import runtime_settings
 
 
 @pytest.fixture
@@ -22,6 +23,8 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(server, 'AUTH_PATH', tmp_path/'auth.json')
     monkeypatch.setattr(server, 'SESSION_SECRET_PATH', tmp_path/'session.key')
     monkeypatch.setattr(ai_proxy, 'CONFIG_PATH', tmp_path/'ai_proxy.json')
+    monkeypatch.setattr(runtime_settings, 'CONFIG_PATH', tmp_path/'mail_account.json')
+    runtime_settings.write({**runtime_settings.defaults(), 'email':'me@example.com', 'historySince':'2026-04-07', 'verified':True, 'shareWithModel':True})
     salt=os.urandom(16)
     password='strong-password-test-!'
     (tmp_path/'auth.json').write_text(json.dumps({'salt':salt.hex(),'iterations':2000,'hash':hashlib.pbkdf2_hmac('sha256',password.encode(),salt,2000).hex()}))
@@ -34,7 +37,7 @@ def client(tmp_path, monkeypatch):
 def test_login_gate_and_data(client):
     r=client.get('/')
     assert 'window.__ATLAS_SERVER__=' in r.text
-    assert 'Outlook MCP' in r.text
+    assert '邮箱与 API 设置' in r.text
     snap=client.get('/api/snapshot').json()
     assert len(snap['model']['items'])==2
     assert snap['revision']==1

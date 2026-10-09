@@ -76,7 +76,7 @@ h1,h2,h3{font-family:"Noto Sans SC","PingFang SC",sans-serif;color:var(--ink)}
 @media print{.workspace-nav,.focus-filters,.focus-more{display:none!important}.focus-workbench{background:#fff;color:#1e3231;border:1px solid var(--line)}.focus-workbench h2,.focus-action,.focus-action-copy>strong,.focus-action-copy>span,.focus-action-meta>strong,.focus-action-meta>span,.focus-workbench-heading p{color:#1e3231}.focus-layout{grid-template-columns:1.5fr 1fr}.focus-action{break-inside:avoid}.focus-title-line{print-color-adjust:exact}.overview-secondary{display:none}}
 
 </style>
-</head>
+<style>.setup-banner:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;border:1px solid var(--line);background:#e9ecdd;margin-bottom:28px}.setup-banner strong{font-size:18px}.setup-banner p{margin:8px 0 0;line-height:1.7}.setup-banner .btn{white-space:nowrap}@media(max-width:650px){.setup-banner:not([hidden]){align-items:flex-start;flex-direction:column}}.lan-modal summary{cursor:pointer;padding:12px 0}.lan-modal select.lan-input{height:auto}</style></head>
 <body>
 <div class="layout">
 
@@ -93,14 +93,14 @@ h1,h2,h3{font-family:"Noto Sans SC","PingFang SC",sans-serif;color:var(--ink)}
  </nav>
 <div class="content">
 <section class="view active" id="view-overview" aria-label="今日焦点">
-  <div class="focus-page-heading"><div><p class="focus-date" id="focusDate"></p><h1>现在最重要的</h1><span class="focus-title-line" aria-hidden="true"></span></div><button class="btn" type="button" data-navigate="actions">全部行动 ↗</button></div>
+  <aside class="setup-banner" id="setupBanner"><div><strong>从自己的邮箱开始</strong><p>连接 Outlook 或 Gmail，再填写自己的 API 和模型。</p></div><button class="btn primary" type="button" data-lan-action="mail-settings">开始设置 ↗</button></aside><div class="focus-page-heading"><div><p class="focus-date" id="focusDate"></p><h1>现在最重要的</h1><span class="focus-title-line" aria-hidden="true"></span></div><button class="btn" type="button" data-navigate="actions">全部行动 ↗</button></div>
   <div class="focus-layout">
     <section class="focus-workbench" aria-labelledby="focusHeading">
       <header class="focus-workbench-heading"><div><h2 id="focusHeading">优先<span>行动</span></h2><p id="focusSummary" aria-live="polite"></p></div><div class="focus-filters" role="group" aria-label="重点事项优先级"><button type="button" data-focus-priority="all" aria-pressed="true">P0 ＋ P1</button><button type="button" data-focus-priority="P0" aria-pressed="false">P0</button><button type="button" data-focus-priority="P1" aria-pressed="false">P1</button></div></header>
       <div id="focusActions" class="focus-actions"></div>
       <button type="button" class="focus-more" id="focusMore" data-focus-expand hidden></button>
     </section>
-    <aside class="focus-agenda" aria-labelledby="agendaHeading"><header class="focus-agenda-heading"><h2 id="agendaHeading">近期节点</h2><span>未来 30 天 · 德国时间</span></header><div id="focusAgenda" class="focus-agenda-list"></div><p class="focus-agenda-note">确认日程和手动计划分开标记；点击节点查看依据。</p></aside>
+    <aside class="focus-agenda" aria-labelledby="agendaHeading"><header class="focus-agenda-heading"><h2 id="agendaHeading">近期节点</h2><span>未来 30 天 · 所选时区</span></header><div id="focusAgenda" class="focus-agenda-list"></div><p class="focus-agenda-note">确认日程和手动计划分开标记；点击节点查看依据。</p></aside>
   </div>
   <details class="focus-waiting" id="focusWaitingSection"><summary><span>等待外部反馈</span><span id="focusWaitingCount"></span><span class="focus-waiting-preview" id="focusWaitingPreview"></span></summary><div id="focusWaiting" class="focus-waiting-list"></div></details>
   <details class="overview-secondary"><summary>项目概况与历史进展 <span>查看统计、里程碑与重点项目</span></summary>
@@ -113,7 +113,7 @@ h1,h2,h3{font-family:"Noto Sans SC","PingFang SC",sans-serif;color:var(--ink)}
 
 
 <section class="view" id="view-today">
- <div class="page-title"><div><h1>邮件更新记录</h1><p>收录10月8日初始快照与后续自动刷新的增量记录；同一个预约合并显示，推广默认隐藏。</p><p id="mailHistoryCheckStatus" aria-live="polite"></p></div><button class="btn" data-navigate="projects">查看全部项目 →</button></div>
+ <div class="page-title"><div><h1>邮件更新记录</h1><p>收录已同步的邮件记录；同一个预约合并显示，推广默认隐藏。</p><p id="mailHistoryCheckStatus" aria-live="polite"></p></div><button class="btn" data-navigate="projects">查看全部项目 →</button></div>
  <div class="mail-controls"><div class="today-toolbar" role="group" aria-label="邮件记录筛选">
  <button class="btn small active" type="button" data-today-filter="relevant" aria-pressed="true">非推广</button>
  <button class="btn small" type="button" data-today-filter="action" aria-pressed="false" title="显示 P0 / P1 重点邮件，P0 排在最前">优先处理</button>
@@ -122,19 +122,19 @@ h1,h2,h3{font-family:"Noto Sans SC","PingFang SC",sans-serif;color:var(--ink)}
  <p class="mail-list-summary" id="mailListSummary" role="status" aria-live="polite"></p>
  <aside class="mail-promotion-notice" id="mailPromotionNotice" aria-label="已包含的推广邮件" hidden></aside>
  <div class="today-list" id="todayMailList"></div>
- <div class="callout"><div class="callout-icon">ⓘ</div><div class="callout-text"><strong>核验范围：</strong>初始快照与后续增量记录合并展示，日期按德国时间显示。记录条数不等于订单、申请或交易数量；外部门户结果及未读取的附件仍待核验。</div></div>
+ <div class="callout"><div class="callout-icon">ⓘ</div><div class="callout-text"><strong>核验范围：</strong>按所选邮箱和时区整理邮件记录。记录条数不等于订单、申请或交易数量；外部门户结果及未读取的附件仍待核验。</div></div>
 </section>
 <section class="view" id="view-projects"><div class="page-title"><div><h1>全部项目</h1><p>搜索、筛选并打开详情，可修改里程碑、状态、优先级、备注和截止日期。</p></div><button class="btn primary" data-global-action="add">＋ 新增</button></div><div id="projectFilters"></div><div class="filterhint" id="filterHint"></div><div class="project-grid" id="allProjects"></div></section>
-<section class="view" id="view-timeline"><div class="page-title"><div><h1>六个月时间线</h1><p>从 2026 年 4 月 7 日到 10 月 8 日 · 展示首次记录与最近记录的跨度。</p></div></div><div id="timelineFilters"></div><div class="section-heading" style="margin:18px 0"><div class="tl-key"><span>━ 记录活跃区间</span><span>● 首次记录</span><span>● 最后记录</span></div></div><div class="timeline-card"><div class="tl-inner"><div class="tl-header"><div class="tl-heading">事项</div><div class="tl-months"><div class="tl-month">4 月</div><div class="tl-month">5 月</div><div class="tl-month">6 月</div><div class="tl-month">7 月</div><div class="tl-month">8 月</div><div class="tl-month">9 月</div><div class="tl-month">10 月</div></div></div><div id="timelineRows"></div></div></div><div class="callout"><span class="callout-icon">◷</span><div class="callout-text">本时间线不是项目开始和结束的甘特估算。首尾时间只代表当前对话资料中可追溯到的首次／最近一次记录。未来日程在「行动清单」中。</div></div></section>
+<section class="view" id="view-timeline"><div class="page-title"><div><h1>项目时间线</h1><p id="timelineRange"></p></div></div><div id="timelineFilters"></div><div class="section-heading" style="margin:18px 0"><div class="tl-key"><span>━ 记录活跃区间</span><span>● 首次记录</span><span>● 最后记录</span></div></div><div class="timeline-card"><div class="tl-inner"><div class="tl-header"><div class="tl-heading">事项</div><div class="tl-months"><div class="tl-month">4 月</div><div class="tl-month">5 月</div><div class="tl-month">6 月</div><div class="tl-month">7 月</div><div class="tl-month">8 月</div><div class="tl-month">9 月</div><div class="tl-month">10 月</div></div></div><div id="timelineRows"></div></div></div><div class="callout"><span class="callout-icon">◷</span><div class="callout-text">本时间线不是项目开始和结束的甘特估算。首尾时间只代表当前记录中可追溯到的首次／最近一次记录。未来日程在「行动清单」中。</div></div></section>
 <section class="view" id="view-actions"><div class="page-title"><div><h1>行动清单</h1><p>把多条项目状态汇总成下一步可执行的动作，优先级可在项目详情中修改。</p></div></div><div class="action-tabs" role="group" aria-label="行动筛选"><button class="action-tab active" data-action-filter="all">全部待办</button><button class="action-tab" data-action-filter="urgent">优先 P0</button><button class="action-tab" data-action-filter="14">未来 14 天</button><button class="action-tab" data-action-filter="30">未来 30 天</button><button class="action-tab" data-action-filter="verify">待核实与受阻</button></div><div id="actionSummary" class="filterhint"></div><div class="action-list" id="actionsList"></div></section>
 <section class="view" id="view-activity"><div class="page-title"><div><h1>进展记录</h1><p>按里程碑日期排列：每条仅代表历史可核验记录或你在此看板手动确认的节点。</p></div></div><div id="activityFilters"></div><div class="card activity-card"><div class="event-stack" id="eventStack"></div></div></section>
-<section class="view" id="view-settings"><div class="page-title"><div><h1>数据与设置</h1><p>Mac SQLite 集中保存，局域网设备共享同一份数据；Outlook 邮件每小时自动刷新，德国时间 00:00–06:00 暂停；可随时手动触发。</p></div></div><div class="settings-grid"><div class="card settings-card"><h3>本地 API · AI 助手</h3><p>连接 Mac 上的模型代理，选择模型并测试连接。邮件刷新有新邮件时调用此模型；保存手动进展后也会整理事件上下文。AI 助手在发送问题时调用。</p><div class="lan-actions"><button class="btn primary" type="button" data-lan-action="ai-settings">配置 API / 选择模型</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div></div><div class="card settings-card"><h3>Outlook MCP · 邮件自动刷新</h3><p>每小时检查收件箱、Archive / 存档 / 归档及其子文件夹，以及已发送邮件；模型结合收发往来更新项目和邮件记录。德国时间 00:00–06:00 暂停自动刷新，06:00 恢复；可随时立即刷新。关闭网页不影响后台运行。</p><p id="mcpLastChecked"></p><p id="mailScheduleStatus" aria-live="polite">正在读取计划…</p><button class="btn primary" type="button" data-lan-action="open-mcp">✉ 刷新邮件 / 管理计划</button><button class="btn" type="button" data-lan-action="audit">查看修改历史</button><button class="btn" type="button" data-lan-action="sqlite-backup">备份 SQLite 数据库</button><button class="btn" type="button" data-lan-action="migrate">导入旧版浏览器修改</button><!--__ATLAS_LOGOUT__--></div><div class="card settings-card"><h3>数据来源与精度</h3><details class="snapshot-statistics"><summary>初始邮件快照统计 · 2026年10月8日</summary><div class="today-totals" id="todayTotals"></div><p>相同预约的多封通知合并；统计仅代表初始快照。</p></details><p>快照基准：<b>2026-10-08</b>（Europe/Berlin）<br>追溯窗口：<b>2026-04-07 — 2026-10-08</b><br>依据：历史对话、既有监控任务及 Outlook 电子邮件核对。已读取邮件，但未对接法院、保险理赔系统、BA门户、DevSpace或券商实时数据；附件、外部门户消息未核实。</p><p>百分比 = 项目中“已完成里程碑数 ÷ 当前定义里程碑总数”。它不是执行耗时、申请胜算、投资收益或案件成功概率。持续跟踪不计百分比。</p></div><div class="card settings-card"><h3>共享数据库管理</h3><p>修改自动保存至 Mac 上的 SQLite，共享给同一局域网内访问的设备。可以导出 JSON 备份；不同设备修改同一事项时有版本冲突检测。</p><div><button class="btn primary" data-global-action="export-json">↧ 导出 JSON</button><button class="btn" data-global-action="import">↥ 导入 JSON</button><button class="btn" data-global-action="export-csv">↧ 导出 CSV</button><button class="btn danger" data-global-action="reset">恢复原始快照</button></div><input type="file" id="importInput" accept="application/json,.json" style="display:none"></div><div class="card settings-card"><h3>状态如何理解</h3><ul class="info-list"><li><b>进行中</b>：已开始，后续工作未完成。</li><li><b>等待反馈</b>：关键推进依赖律师／企业／政府／保险等外部响应。</li><li><b>待核实</b>：历史执行已发生，但最新结果或实际持仓未确认。</li><li><b>受阻</b>：存在明确的技术或程序性障碍。</li><li><b>持续跟踪</b>：没有定义的“完成日期”，例如投资研究雷达。</li><li><b>已完成</b>：仅当前定义交付物完结，不等于其他关联项目已完成。</li></ul></div><div class="card settings-card"><h3>关于信息变动</h3><p>如果某事项的数据来自历史某个时间点，之后的实际进展不会自动更新。打开详情后可以修改状态、下一步、事实备注、里程碑。用户手动确认的新事件会明确标记“手动确认”。</p><p id="localSaveInfo" style="font-weight:680;color:#576b91"></p></div></div></section>
-<footer class="footer"><span>PROGRESS ATLAS · 项目进展</span><span>每小时自动检查邮件 · 00:00–06:00 暂停（德国时间） · 支持立即刷新</span></footer>
+<section class="view" id="view-settings"><div class="page-title"><div><h1>数据与设置</h1><p>连接自己的邮箱、API 和模型，按所选时区整理项目。</p></div></div><div class="settings-grid"><div class="card settings-card"><h3>邮箱与连接</h3><p id="accountSetupStatus">尚未完成设置。</p><button class="btn primary" type="button" data-lan-action="mail-settings">邮箱与 API 设置</button></div><div class="card settings-card"><h3>自己的 API · AI 助手</h3><p>使用自己的 OpenAI 兼容 API 和模型。支持 HTTPS 服务及本机代理；密钥只保存在本机后端。</p><div class="lan-actions"><button class="btn primary" type="button" data-lan-action="ai-settings">配置自己的 API / 模型</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div></div><div class="card settings-card"><h3>邮箱 · 自动刷新</h3><p>支持自己的 Outlook 和 Gmail。后台每小时检查收件箱、存档与已发送邮件；所选时区 00:00–06:00 暂停。自动刷新默认关闭。</p><p id="mcpLastChecked"></p><p id="mailScheduleStatus" aria-live="polite">正在读取计划…</p><button class="btn primary" type="button" data-lan-action="open-mcp">✉ 刷新邮件 / 管理计划</button><button class="btn" type="button" data-lan-action="audit">查看修改历史</button><button class="btn" type="button" data-lan-action="sqlite-backup">备份 SQLite 数据库</button><button class="btn" type="button" data-lan-action="migrate">导入旧版浏览器修改</button><!--__ATLAS_LOGOUT__--></div><div class="card settings-card"><h3>数据来源与精度</h3><p>看板从空白数据开始。邮件摘要和项目状态仅依据已读取的邮件与手动记录；收件通知不等于处理完毕，附件和外部门户结果需要另行核实。</p></div><div class="card settings-card"><h3>共享数据库管理</h3><p>修改自动保存至 本机的 SQLite，共享给同一局域网内访问的设备。可以导出 JSON 备份；不同设备修改同一事项时有版本冲突检测。</p><div><button class="btn primary" data-global-action="export-json">↧ 导出 JSON</button><button class="btn" data-global-action="import">↥ 导入 JSON</button><button class="btn" data-global-action="export-csv">↧ 导出 CSV</button><button class="btn danger" data-global-action="reset">恢复空白看板</button></div><input type="file" id="importInput" accept="application/json,.json" style="display:none"></div><div class="card settings-card"><h3>状态如何理解</h3><ul class="info-list"><li><b>进行中</b>：已开始，后续工作未完成。</li><li><b>等待反馈</b>：关键推进依赖律师／企业／政府／保险等外部响应。</li><li><b>待核实</b>：历史执行已发生，但最新结果或实际持仓未确认。</li><li><b>受阻</b>：存在明确的技术或程序性障碍。</li><li><b>持续跟踪</b>：没有定义的“完成日期”，例如投资研究雷达。</li><li><b>已完成</b>：仅当前定义交付物完结，不等于其他关联项目已完成。</li></ul></div><div class="card settings-card"><h3>关于信息变动</h3><p>如果某事项的数据来自历史某个时间点，之后的实际进展不会自动更新。打开详情后可以修改状态、下一步、事实备注、里程碑。用户手动确认的新事件会明确标记“手动确认”。</p><p id="localSaveInfo" style="font-weight:680;color:#576b91"></p></div></div></section>
+<footer class="footer"><span>PROGRESS ATLAS · 项目进展</span><span>支持每小时检查邮件 · 00:00–06:00 暂停（所选时区） · 支持立即刷新</span></footer>
 </div></div></div>
 <div id="overlay" class="overlay" tabindex="-1"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="事项详情"><div class="drawer-head" id="drawerHead"></div><div class="drawer-body" id="drawerBody"></div><div class="drawer-footer" id="drawerFooter"></div></aside>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="lan-modal-backdrop" id="lanBackdrop" hidden><section class="lan-modal" role="dialog" aria-modal="true" aria-labelledby="lanModalTitle"><header><h2 id="lanModalTitle">Outlook 邮件刷新</h2><button class="btn" type="button" data-lan-action="close">关闭</button></header><div id="lanModalBody"></div></section></div>
+<div class="lan-modal-backdrop" id="lanBackdrop" hidden><section class="lan-modal" role="dialog" aria-modal="true" aria-labelledby="lanModalTitle"><header><h2 id="lanModalTitle">邮箱刷新</h2><button class="btn" type="button" data-lan-action="close">关闭</button></header><div id="lanModalBody"></div></section></div>
 <script>/*__SERVER_SNAPSHOT__*/</script>
 <script>
 'use strict';
@@ -201,7 +201,7 @@ function isLive(it){return !['done','rejected'].includes(it.status)}
 function verifiedDeadline(it){return !!it.deadline && it.deadlineVerified!==false && isLive(it)}
 function priLabel(it){return it.priority==='P0'?'紧急 · P0':it.priority==='P1'?'重要 · P1':it.priority==='P2'?'常规 · P2':'低 · P3'}
 function sorted(arr){return [...arr].sort((a,b)=>{let p=(PRIORITY[a.priority]??3)-(PRIORITY[b.priority]??3);if(p!==0)return p;let s=(a.status==='blocked'?-2:a.status==='waiting'?-1:0)-(b.status==='blocked'?-2:b.status==='waiting'?-1:0);if(s!==0)return s;return String(b.last).localeCompare(String(a.last))})}
-function filtered(){return sorted(model.items.filter(x=>(state.category==='all'||x.category===state.category)&&(state.status==='all'||x.status===state.status)&&(state.priority==='all'||x.priority===state.priority)&&(state.sourceFilter==='all'||(state.sourceFilter==='today'?(x.mailEvidence||[]).some(e=>e.date===BOOTSTRAP.snapshotDate):(x.mailEvidence||[]).length>0))&&(!state.search||[x.title,x.category,x.status,x.next,x.blocker,x.notes,x.source,...(x.mailEvidence||[]).map(e=>[e.subject,e.summary,e.date].join(' ')),...(x.tags||[])].join(' ').toLowerCase().includes(state.search.toLowerCase()))))}
+function filtered(){return sorted(model.items.filter(x=>(state.category==='all'||x.category===state.category)&&(state.status==='all'||x.status===state.status)&&(state.priority==='all'||x.priority===state.priority)&&(state.sourceFilter==='all'||(state.sourceFilter==='today'?(x.mailEvidence||[]).some(e=>e.date===ndate()):(x.mailEvidence||[]).length>0))&&(!state.search||[x.title,x.category,x.status,x.next,x.blocker,x.notes,x.source,...(x.mailEvidence||[]).map(e=>[e.subject,e.summary,e.date].join(' ')),...(x.tags||[])].join(' ').toLowerCase().includes(state.search.toLowerCase()))))}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
 function setPage(page){state.page=page;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+page));document.querySelectorAll('.navbtn').forEach(x=>x.classList.toggle('active',x.dataset.page===page));let b={overview:'今日焦点',today:'邮件更新记录',projects:'全部项目',timeline:'时间线',actions:'行动清单',activity:'更新记录',settings:'数据与设置'};document.getElementById('crumb').textContent=b[page];window.scrollTo({top:0,behavior:'instant'});render()}
 const TODAY_LABELS={urgent:'安全风险',action:'跟进待办',outcome:'明确结果',operation:'运营动态',info:'信息通知',promotion:'推广忽略'};
@@ -260,7 +260,7 @@ function todayCard(entry) {
   const time = mailRecordSeconds(entry) === null ? '' : entry.time;
   const priority = mailRecordPriority(entry, model.items);
   const direction = entry.direction === 'sent' ? ' · 已发送' : entry.direction === 'received' ? ' · 收到' : '';
-  return `<article id="mail-record-${attr(entry.id)}" class="today-full-card ${entry.kind === 'urgent' ? 'urgent' : ''} ${entry.kind === 'promotion' ? 'today-promotional' : ''}" data-mail-id="${attr(entry.id)}" data-mail-date="${attr(date)}" data-mail-time="${attr(time)}" data-mail-priority="${priority}"><div class="today-time"><time${date ? ` datetime="${attr(date + (time ? 'T' + time : ''))}"` : ''}><span class="mail-record-date">${esc(date || '日期未记录')}</span>${time ? `<span class="mail-record-clock">${esc(time)}</span>` : ''}</time><small>德国时间${esc(direction)}</small></div><div><div class="today-category"><span class="small-badge ${priority.toLowerCase()}">${priority}</span> ${esc(entry.kind === 'promotion' ? '推广邮件' : TODAY_LABELS[entry.kind] || '邮件记录')} · ${esc(entry.count || 1)} 封原始邮件</div><h3>${esc(mailRecordTitle(entry))}</h3><p>${esc(entry.detail)}</p>${entry.action ? `<div class="today-next"><strong>下一步：</strong>${esc(entry.action)}</div>` : ''}<div class="today-source">Outlook · ${esc(date || '日期未记录')} · ${esc(entry.sourceSubject)}</div>${entry.projectId ? `<button type="button" class="today-project-button" data-open="${attr(entry.projectId)}">打开对应项目 ↗</button>` : ''}</div></article>`;
+  return `<article id="mail-record-${attr(entry.id)}" class="today-full-card ${entry.kind === 'urgent' ? 'urgent' : ''} ${entry.kind === 'promotion' ? 'today-promotional' : ''}" data-mail-id="${attr(entry.id)}" data-mail-date="${attr(date)}" data-mail-time="${attr(time)}" data-mail-priority="${priority}"><div class="today-time"><time${date ? ` datetime="${attr(date + (time ? 'T' + time : ''))}"` : ''}><span class="mail-record-date">${esc(date || '日期未记录')}</span>${time ? `<span class="mail-record-clock">${esc(time)}</span>` : ''}</time><small>${esc(model.timezone || 'UTC')}${esc(direction)}</small></div><div><div class="today-category"><span class="small-badge ${priority.toLowerCase()}">${priority}</span> ${esc(entry.kind === 'promotion' ? '推广邮件' : TODAY_LABELS[entry.kind] || '邮件记录')} · ${esc(entry.count || 1)} 封原始邮件</div><h3>${esc(mailRecordTitle(entry))}</h3><p>${esc(entry.detail)}</p>${entry.action ? `<div class="today-next"><strong>下一步：</strong>${esc(entry.action)}</div>` : ''}<div class="today-source">邮箱 · ${esc(date || '日期未记录')} · ${esc(entry.sourceSubject)}</div>${entry.projectId ? `<button type="button" class="today-project-button" data-open="${attr(entry.projectId)}">打开对应项目 ↗</button>` : ''}</div></article>`;
 }
 
 function renderToday() {
@@ -279,7 +279,7 @@ function renderToday() {
   const records = selectMailRecords(all, { ...options, filter: state.todayFilter });
   document.getElementById('mailTimeOrder').value = options.order;
   const timeOrder = options.order === 'oldest' ? '最早在前' : '最新在前';
-  document.getElementById('mailListSummary').textContent = `${state.todayFilter === 'action' ? '优先处理 · 先 P0，再 P1' : state.todayFilter === 'all' ? '全部邮件（含推广）' : '邮件记录（不含推广）'} · 显示 ${records.length} 条 · ${state.todayFilter === 'action' ? '各优先级内' : ''}${timeOrder} · 德国时间`;
+  document.getElementById('mailListSummary').textContent = `${state.todayFilter === 'action' ? '优先处理 · 先 P0，再 P1' : state.todayFilter === 'all' ? '全部邮件（含推广）' : '邮件记录（不含推广）'} · 显示 ${records.length} 条 · ${state.todayFilter === 'action' ? '各优先级内' : ''}${timeOrder} · ${model.timezone || 'UTC'}`;
   const promotions = records.filter(entry => entry.kind === 'promotion');
   const promotionNotice = document.getElementById('mailPromotionNotice');
   promotionNotice.hidden = state.todayFilter !== 'all' || !promotions.length;
@@ -288,18 +288,18 @@ function renderToday() {
 }
 
 
-function metrics(){const n=model.items.length;const active=model.items.filter(isLive).length;const p0=model.items.filter(x=>x.priority==='P0'&&isLive(x)).length;const requires=model.items.filter(x=>['waiting','verification','blocked'].includes(x.status)).length;const coming=model.items.filter(x=>verifiedDeadline(x)&&daysUntil(x.deadline)>=0&&daysUntil(x.deadline)<=30).length;const arr=[['收录事项',n,'全部领域 / 已去重','▦'],['仍在推进',active,'不含已完成交付物','↗'],['紧急优先级',p0,'P0 · 需要先处理','!'],['等待 / 待核实 / 受阻',requires,'外部依赖与证据缺口','◷'],['30 天内确认日程',coming,'仅统计确认过的截止日','◉'],['Outlook 已核实',model.items.filter(x=>(x.mailEvidence||[]).length).length,'仅为证据覆盖，不等于完成','✉']];document.getElementById('metrics').innerHTML=arr.map(x=>`<div class="metric"><div class="metric-label"><span class="metric-icon">${x[3]}</span>${x[0]}</div><div class="metric-value">${x[1]}</div><div class="metric-hint">${x[2]}</div></div>`).join('')}
-function drawCharts(){let total=model.items.length||1,max=Math.max(1,...model.categories.map(c=>model.items.filter(i=>i.category===c).length));document.getElementById('categoryChart').innerHTML=model.categories.map((c,i)=>{const n=model.items.filter(x=>x.category===c).length;let colors=['#6e80d6','#7a9ccd','#84afd2','#7690d0','#70afa8','#93a1db','#b59bd6','#b4a37b','#77a8aa'];return `<div class="bar-row"><span class="bar-row-name">${esc(c)}</span><div class="bar-row-track"><div class="bar-row-fill" style="width:${n/max*100}%;background:${colors[i]}"></div></div><span class="bar-row-count">${n}</span></div>`}).join('');let groups=STATUS_ORDER.map(k=>({key:k,n:model.items.filter(x=>x.status===k).length})).filter(x=>x.n);let pos=0;let segments=groups.map(x=>{let start=pos;pos+=x.n/total*100;return `${STATUS[x.key].color} ${start}% ${pos}%`});document.getElementById('statusDonut').style.background=segments.length?`conic-gradient(${segments.join(',')})`:'#edf1f7';document.getElementById('donutNumber').textContent=model.items.length;document.getElementById('donutLegend').innerHTML=groups.map(x=>`<div class="legend-row"><span class="status-dot" style="background:${STATUS[x.key].color}"></span>${STATUS[x.key].label}<span class="num">${x.n}</span></div>`).join('');const counts=new Array(7).fill(0);model.items.forEach(x=>(x.milestones||[]).forEach(m=>{if(m.done&&m.date&&m.date>='2026-04-07'&&m.date<=model.windowEnd)counts[Number(m.date.slice(5,7))-4]++}));let cm=Math.max(...counts,1);document.getElementById('monthChart').innerHTML=counts.map((n,i)=>`<div class="month-col"><b>${n||'·'}</b><div class="thebar ${n?'':'zero'}" title="${i+4} 月 ${n} 个已记录节点" style="height:${Math.max(5,n/cm*113)}px"></div><small>${i+4} 月</small></div>`).join('')}
+function metrics(){const n=model.items.length;const active=model.items.filter(isLive).length;const p0=model.items.filter(x=>x.priority==='P0'&&isLive(x)).length;const requires=model.items.filter(x=>['waiting','verification','blocked'].includes(x.status)).length;const coming=model.items.filter(x=>verifiedDeadline(x)&&daysUntil(x.deadline)>=0&&daysUntil(x.deadline)<=30).length;const arr=[['收录事项',n,'全部领域 / 已去重','▦'],['仍在推进',active,'不含已完成交付物','↗'],['紧急优先级',p0,'P0 · 需要先处理','!'],['等待 / 待核实 / 受阻',requires,'外部依赖与证据缺口','◷'],['30 天内确认日程',coming,'仅统计确认过的截止日','◉'],['邮件证据覆盖',model.items.filter(x=>(x.mailEvidence||[]).length).length,'仅为证据覆盖，不等于完成','✉']];document.getElementById('metrics').innerHTML=arr.map(x=>`<div class="metric"><div class="metric-label"><span class="metric-icon">${x[3]}</span>${x[0]}</div><div class="metric-value">${x[1]}</div><div class="metric-hint">${x[2]}</div></div>`).join('')}
+function drawCharts(){let total=model.items.length||1,max=Math.max(1,...model.categories.map(c=>model.items.filter(i=>i.category===c).length));document.getElementById('categoryChart').innerHTML=model.categories.map((c,i)=>{const n=model.items.filter(x=>x.category===c).length;let colors=['#6e80d6','#7a9ccd','#84afd2','#7690d0','#70afa8','#93a1db','#b59bd6','#b4a37b','#77a8aa'];return `<div class="bar-row"><span class="bar-row-name">${esc(c)}</span><div class="bar-row-track"><div class="bar-row-fill" style="width:${n/max*100}%;background:${colors[i]}"></div></div><span class="bar-row-count">${n}</span></div>`}).join('');let groups=STATUS_ORDER.map(k=>({key:k,n:model.items.filter(x=>x.status===k).length})).filter(x=>x.n);let pos=0;let segments=groups.map(x=>{let start=pos;pos+=x.n/total*100;return `${STATUS[x.key].color} ${start}% ${pos}%`});document.getElementById('statusDonut').style.background=segments.length?`conic-gradient(${segments.join(',')})`:'#edf1f7';document.getElementById('donutNumber').textContent=model.items.length;document.getElementById('donutLegend').innerHTML=groups.map(x=>`<div class="legend-row"><span class="status-dot" style="background:${STATUS[x.key].color}"></span>${STATUS[x.key].label}<span class="num">${x.n}</span></div>`).join('');const months=Array.from({length:6},(_,i)=>{const end=dateObj(model.windowEnd);const d=new Date(Date.UTC(end.getFullYear(),end.getMonth()-5+i,1));return d.toISOString().slice(0,7)});const counts=months.map(month=>model.items.reduce((n,x)=>n+(x.milestones||[]).filter(m=>m.done&&String(m.date||'').startsWith(month)).length,0));let cm=Math.max(...counts,1);document.getElementById('monthChart').innerHTML=counts.map((n,i)=>`<div class="month-col"><b>${n||'·'}</b><div class="thebar ${n?'':'zero'}" title="${months[i]} ${n} 个已记录节点" style="height:${Math.max(5,n/cm*113)}px"></div><small>${months[i]}</small></div>`).join('')}
 function events(){let ar=[];model.items.forEach(it=>(it.milestones||[]).forEach(m=>{if(m.done&&m.date)ar.push({id:it.id,title:it.title,category:it.category,date:m.date,description:m.text,source:m.source||it.source})}));return ar.sort((a,b)=>b.date.localeCompare(a.date)||a.title.localeCompare(b.title))}
 function renderRecent(){document.getElementById('recentUpdates').innerHTML=events().slice(0,5).map(e=>`<div class="recent-item"><span class="recent-date">${prettyDate(e.date.slice(5))}</span><span class="recent-node"></span><div class="recent-content"><b>${esc(e.description)}</b><span>${esc(e.title)}</span></div></div>`).join('')}
 function card(it){let pr=progress(it),done=milestonesDone(it),total=it.milestones?.length||0;return `<article class="card project-card" role="button" tabindex="0" data-open="${attr(it.id)}" aria-label="查看${attr(it.title)}详情"><div class="project-meta"><span class="category-id"><span class="cat-icon">${CATICONS[it.category]||'◈'}</span>${esc(it.category)}</span><span class="small-badge ${it.priority==='P0'?'p0':it.priority==='P1'?'p1':''}">${it.priority}</span></div><h3 class="project-title">${esc(it.title)}</h3><p class="project-next">${esc(it.next||'尚未设置下一步行动')}</p><div class="project-bottom"><div class="project-statusline"><span class="project-status"><span class="status-dot" style="background:${stat(it).color}"></span>${stat(it).label}</span><span>${pr===null?it.mode==='ongoing'?'持续追踪':'未定义进度':`${pr}% · ${done}/${total} 节点`}</span></div>${pr===null?'<div class="progress-track"><div class="progress-fill" style="width:100%;opacity:.18"></div></div>':`<div class="progress-track"><div class="progress-fill" style="width:${pr}%;background:${pr===100?'#65ae89':'#6781df'}"></div></div>`}<div class="project-footer"><span class="project-tags">${(it.mailEvidence||[]).length?'✉ Outlook · ':''}${esc(it.tags?.slice(0,2).join(' · ')||it.category)}</span><span>最近记录 ${esc(dateShort(it.last))}<span class="project-go"> ↗</span></span></div></div></article>`}
-function filterMarkup(prefix){const catOpts=`<option value="all">全部类别</option>`+model.categories.map(c=>`<option value="${attr(c)}" ${state.category===c?'selected':''}>${esc(c)}</option>`).join('');const sOpts='<option value="all">全部状态</option>'+STATUS_ORDER.map(s=>`<option value="${s}" ${state.status===s?'selected':''}>${STATUS[s].label}</option>`).join('');const pOpts='<option value="all">全部优先级</option>'+['P0','P1','P2','P3'].map(p=>`<option ${state.priority===p?'selected':''} value="${p}">${p}</option>`).join('');return `<div class="filters"><div class="searchbox"><span>⌕</span><input aria-label="搜索项目" data-filter="search" placeholder="搜索事项、下一步、关键词..." value="${attr(state.search)}"></div><select aria-label="分类" data-filter="category">${catOpts}</select><select aria-label="状态" data-filter="status">${sOpts}</select><select aria-label="优先级" data-filter="priority">${pOpts}</select><select aria-label="邮件证据筛选" data-filter="sourceFilter"><option value="all" ${state.sourceFilter==='all'?'selected':''}>全部来源</option><option value="mail" ${state.sourceFilter==='mail'?'selected':''}>✉ 已核验 Outlook</option><option value="today" ${state.sourceFilter==='today'?'selected':''}>✦ 今天收到的邮件</option></select><button class="btn small" data-filter-clear>清空筛选</button></div>`}
+function filterMarkup(prefix){const catOpts=`<option value="all">全部类别</option>`+model.categories.map(c=>`<option value="${attr(c)}" ${state.category===c?'selected':''}>${esc(c)}</option>`).join('');const sOpts='<option value="all">全部状态</option>'+STATUS_ORDER.map(s=>`<option value="${s}" ${state.status===s?'selected':''}>${STATUS[s].label}</option>`).join('');const pOpts='<option value="all">全部优先级</option>'+['P0','P1','P2','P3'].map(p=>`<option ${state.priority===p?'selected':''} value="${p}">${p}</option>`).join('');return `<div class="filters"><div class="searchbox"><span>⌕</span><input aria-label="搜索项目" data-filter="search" placeholder="搜索事项、下一步、关键词..." value="${attr(state.search)}"></div><select aria-label="分类" data-filter="category">${catOpts}</select><select aria-label="状态" data-filter="status">${sOpts}</select><select aria-label="优先级" data-filter="priority">${pOpts}</select><select aria-label="邮件证据筛选" data-filter="sourceFilter"><option value="all" ${state.sourceFilter==='all'?'selected':''}>全部来源</option><option value="mail" ${state.sourceFilter==='mail'?'selected':''}>✉ 有邮件证据</option><option value="today" ${state.sourceFilter==='today'?'selected':''}>✦ 今天收到的邮件</option></select><button class="btn small" data-filter-clear>清空筛选</button></div>`}
 function renderProjects(skipFilters=false){if(!skipFilters)document.getElementById('projectFilters').innerHTML=filterMarkup();let it=filtered();document.getElementById('filterHint').textContent=`显示 ${it.length} / ${model.items.length} 项 · 可筛选“今天收到的邮件” · 点击编辑详情`;document.getElementById('allProjects').innerHTML=it.length?it.map(card).join(''):'<div class="card empty" style="grid-column:1/-1"><div><b>没有符合条件的事项</b><p>试试清空筛选或新增项目</p></div></div>'}
-function getPct(s){const min=dateObj(model.windowStart).getTime(),max=dateObj(model.windowEnd).getTime(),val=dateObj(s||model.windowStart).getTime();return Math.min(100,Math.max(0,(val-min)/(max-min)*100))}
-function renderTimeline(skipFilters=false){if(!skipFilters)document.getElementById('timelineFilters').innerHTML=filterMarkup();let ar=filtered().sort((a,b)=>(a.first||'').localeCompare(b.first||'')||(PRIORITY[a.priority]||0)-(PRIORITY[b.priority]||0));document.getElementById('timelineRows').innerHTML=ar.length?ar.map(x=>{let a=getPct(x.first),b=getPct(x.last),w=Math.max(1.5,b-a);return `<div class="tl-row" data-open="${attr(x.id)}"><div class="tl-name"><span class="status-dot" style="background:${stat(x).color}"></span><b title="${attr(x.title)}">${esc(x.title)}</b></div><div class="tl-dates" title="首次 ${esc(x.first)} · 最近 ${esc(x.last)}"><span class="tl-bar ${x.status}" style="left:${a}%;width:${w}%"></span><span class="tl-start" style="left:calc(${a}% - 7px)"></span><span class="tl-end" style="left:calc(${b}% - 7px)"></span></div></div>`}).join(''):'<div class="empty">当前筛选没有对应事项</div>'}
+function getPct(s){const min=dateObj(model.windowStart).getTime(),max=dateObj(model.windowEnd).getTime(),val=dateObj(s||model.windowStart).getTime();return Math.min(100,Math.max(0,(val-min)/Math.max(1,max-min)*100))}
+function renderTimeline(skipFilters=false){document.getElementById('timelineRange').textContent=model.windowStart+' — '+model.windowEnd+' · 首次与最近记录的跨度';const start=dateObj(model.windowStart).getTime(),end=dateObj(model.windowEnd).getTime();document.querySelector('.tl-months').innerHTML=Array.from({length:7},(_,i)=>'<div class=tl-month>'+new Date(start+(end-start)*i/6).toISOString().slice(0,10)+'</div>').join('');if(!skipFilters)document.getElementById('timelineFilters').innerHTML=filterMarkup();let ar=filtered().sort((a,b)=>(a.first||'').localeCompare(b.first||'')||(PRIORITY[a.priority]||0)-(PRIORITY[b.priority]||0));document.getElementById('timelineRows').innerHTML=ar.length?ar.map(x=>{let a=getPct(x.first),b=getPct(x.last),w=Math.max(1.5,b-a);return `<div class="tl-row" data-open="${attr(x.id)}"><div class="tl-name"><span class="status-dot" style="background:${stat(x).color}"></span><b title="${attr(x.title)}">${esc(x.title)}</b></div><div class="tl-dates" title="首次 ${esc(x.first)} · 最近 ${esc(x.last)}"><span class="tl-bar ${x.status}" style="left:${a}%;width:${w}%"></span><span class="tl-start" style="left:calc(${a}% - 7px)"></span><span class="tl-end" style="left:calc(${b}% - 7px)"></span></div></div>`}).join(''):'<div class="empty">当前筛选没有对应事项</div>'}
 function renderActions(){document.querySelectorAll('[data-action-filter]').forEach(e=>e.classList.toggle('active',e.dataset.actionFilter===state.actionFilter));let ar=sorted(model.items.filter(isLive));if(state.actionFilter==='urgent')ar=ar.filter(x=>x.priority==='P0');if(state.actionFilter==='verify')ar=ar.filter(x=>['waiting','verification','blocked'].includes(x.status));if(state.actionFilter==='14'||state.actionFilter==='30'){const max=Number(state.actionFilter);ar=ar.filter(x=>verifiedDeadline(x)&&daysUntil(x.deadline)>=0&&daysUntil(x.deadline)<=max).sort((a,b)=>a.deadline.localeCompare(b.deadline))}document.getElementById('actionSummary').textContent=`${ar.length} 条下一步行动 · 只展示每个项目当前最关键的一条，不把未核实期限当硬截止日`;document.getElementById('actionsList').innerHTML=ar.length?ar.map(it=>{let d=verifiedDeadline(it)?daysUntil(it.deadline):null;return `<div class="action-row" role="button" tabindex="0" data-open="${attr(it.id)}"><div class="action-stripe" style="background:${stat(it).color}"></div><div class="action-info"><strong>${esc(it.title)}</strong><p>${esc(it.next||'请补充下一步行动')}</p><div class="action-small">${esc(it.category)} · ${esc(stat(it).label)} · ${esc(it.priority)}</div></div><div class="action-right"><b>${d!==null?(d<0?'已过期 '+Math.abs(d)+' 天':d===0?'今天':`还有 ${d} 天`):'待安排'}</b><small>${verifiedDeadline(it)?dateShort(it.deadline):'无确认硬截止日'}</small></div></div>`}).join(''):'<div class="card empty"><div><b>这一筛选下没有确认的行动</b><p>例如 14 天内没有确认截止日，不代表没有其他重要待办。</p></div></div>'}
 function renderActivity(skipFilters=false){if(!skipFilters)document.getElementById('activityFilters').innerHTML=filterMarkup();const ids=new Set(filtered().map(x=>x.id));let ar=events().filter(x=>ids.has(x.id));document.getElementById('eventStack').innerHTML=ar.length?ar.slice(0,180).map(x=>`<div class="event"><span class="event-date">${esc(dateShort(x.date))}</span><strong>${esc(x.description)}</strong><p>${esc(x.title)}</p><small>${esc(x.source||'历史对话')}</small></div>`).join(''):'<div class="empty">没有带日期的已确认里程碑</div>'}
-function renderSettings(){const sum=model.todayMailSummary||BOOTSTRAP.todayMailSummary;document.getElementById('todayTotals').innerHTML=[['原始收件',sum.receivedCount],['去重有效信息',sum.groupedRelevantCount],['排除推广',sum.promotionalCount]].map(([label,value])=>`<div class="today-total"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('');let el=document.getElementById('localSaveInfo');if(el)el.textContent=`当前 ${model.items.length} 项事项 · Mac SQLite 共享数据库 · ${model.lastSavedAt?'最近修改 '+prettyDate(model.lastSavedAt.slice(0,10)):'尚未修改初始快照'}`}
+function renderSettings(){const el=document.getElementById('localSaveInfo');if(el)el.textContent='当前 '+model.items.length+' 项事项 · 本机 SQLite · '+(model.timezone||'UTC');loadSetupStatus();}
 function render(){document.getElementById('sidebarCount').textContent=model.items.length;document.getElementById('currentDate').textContent='共享数据库 · '+model.items.length+' 项';document.getElementById('todaySidebarCount').textContent=(model.todayUpdates||[]).filter(e=>e.kind!=='promotion').length;if(state.page==='overview')renderOverview();if(state.page==='today')renderToday();if(state.page==='projects')renderProjects();if(state.page==='timeline')renderTimeline();if(state.page==='actions')renderActions();if(state.page==='activity')renderActivity();if(state.page==='settings')renderSettings()}
 async function updateItem(id,mutate,reDrawDrawer=false){
  if(isSaving){toast('上一次保存尚未完成');return;}
@@ -346,7 +346,7 @@ function importJSON(file){if(!file)return;const rd=new FileReader();rd.onload=as
   const r=await api('/api/import',{method:'POST',body:JSON.stringify({model:data,expectedRevision:serverRevision})});serverRevision=r.revision;
   await refreshFromServer(true);closeDrawer();setPage('overview');toast('已导入共享数据库');
  }catch(e){toast('导入失败：'+e.message)}};rd.readAsText(file,'utf-8')}
-async function reset(){if(!confirm('确定让所有设备恢复到初始快照？这会覆盖 SQLite 中的全部修改。请先导出 JSON 备份。'))return;
+async function reset(){if(!confirm('确定让所有设备恢复为空白看板？这会覆盖 SQLite 中的全部修改。请先导出 JSON 备份。'))return;
  try{const r=await api('/api/reset',{method:'POST',body:JSON.stringify({expectedRevision:serverRevision})});serverRevision=r.revision;
  await refreshFromServer(true);closeDrawer();setPage('overview');toast('已重置共享数据库');}
  catch(e){toast('重置失败：'+e.message)}
@@ -361,7 +361,7 @@ document.getElementById('overlay').addEventListener('click',closeDrawer);
 const focusState = { priority: 'all', expanded: false, day: '' };
 
 function todayInBerlin(now = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: typeof model === 'undefined' ? 'Europe/Berlin' : model.timezone || 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
   const value = type => parts.find(part => part.type === type).value;
   return `${value('year')}-${value('month')}-${value('day')}`;
 }
@@ -521,16 +521,16 @@ function closeModal(){modal.hidden=true;currentProposalToken=''}
 function updateMcpLast(){
  const last=model.lastInboxUpdate;
  let stamp=last?.date||'';
- if(stamp.includes('T')){const date=new Date(stamp);if(!Number.isNaN(date.getTime()))stamp=date.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
- const label=last?'最近邮件检查：'+stamp+'（德国时间）':'尚无邮件检查记录';
+ if(stamp.includes('T')){const date=new Date(stamp);if(!Number.isNaN(date.getTime()))stamp=date.toLocaleString('zh-CN',{timeZone:model.timezone||'UTC',hour12:false});}
+ const label=last?'最近邮件检查：'+stamp+'（'+(model.timezone||'UTC')+'）':'尚无邮件检查记录';
  for(const id of ['mcpLastChecked','mailCheckStatus','mailHistoryCheckStatus']){const el=document.getElementById(id);if(el)el.textContent=label;}
 }
 let mailStatus=null,mailStatusBusy=false;
-function mailTime(value){if(!value)return '尚无记录';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString('zh-CN',{timeZone:'Europe/Berlin',hour12:false});}
+function mailTime(value){if(!value)return '尚无记录';const d=new Date(value);return Number.isNaN(d.getTime())?value:d.toLocaleString('zh-CN',{timeZone:model.timezone||'UTC',hour12:false});}
 function renderMailStatus(){
  if(!mailStatus)return;
  const s=mailStatus,last=s.runs[0];
- const schedule=s.enabled?(s.quietNow?'夜间暂停中':'每小时自动刷新')+' · 00:00–06:00 暂停 · 下次 '+mailTime(s.nextRunAt)+'（德国时间）':'自动刷新已暂停；仍可立即刷新';
+ const schedule=s.enabled?(s.quietNow?'夜间暂停中':'每小时自动刷新')+' · 00:00–06:00 暂停 · 下次 '+mailTime(s.nextRunAt)+'（'+(model.timezone||'UTC')+'）':'自动刷新已暂停；仍可立即刷新';
  const scope='关注范围：'+s.scope.join('、');
  const setting=document.getElementById('mailScheduleStatus');if(setting)setting.textContent=schedule+' · '+scope;
  const el=document.getElementById('mailSyncDetails');if(!el)return;
@@ -541,22 +541,23 @@ function renderMailStatus(){
 }
 async function loadMailStatus(){
  if(mailStatusBusy)return;mailStatusBusy=true;
- try{mailStatus=await api('/api/outlook/status');renderMailStatus();}
+ try{mailStatus=await api('/api/mail/status');renderMailStatus();}
  catch(e){const el=document.getElementById('mailSyncDetails');if(el)el.textContent=e.message;}
  finally{mailStatusBusy=false;}
 }
 async function openMcp(){
- openModal('Outlook 邮件刷新',`<p>Mac 后台每小时检查收件箱、Archive / 存档 / 归档及其子文件夹，以及已发送邮件；自动刷新和立即刷新的范围相同。模型会区分收到的回复与我已发送的申请、回复和催办；已发送不等于对方已确认或事项已完成。德国时间 00:00–06:00 暂停自动刷新，06:00 恢复；手动立即刷新随时可用。关闭网页也会继续运行。没有新邮件时不调用模型。</p><p>邮件检查会向所选模型发送项目摘要和新邮件的部分正文；不读取附件。运行结果和错误会显示在下方。</p><div id="mailSyncDetails" aria-live="polite">正在读取刷新状态…</div>`);
+ openModal('邮箱刷新',`<p>后台检查自己的收件箱、存档和已发送邮件。自动刷新每小时运行，所选时区 00:00–06:00 暂停；手动刷新随时可用。新邮件的部分正文及项目摘要会发送至你配置的模型，不读取附件。</p><div class="lan-actions"><button class="btn" data-lan-action="mail-settings">邮箱与 API 设置</button></div><div id="mailSyncDetails" aria-live="polite">正在读取状态…</div>`);
  await loadMailStatus();
 }
+
 async function triggerMailRefresh(){
  const button=document.querySelector('[data-lan-action="mail-refresh"]');if(button)button.disabled=true;
- try{const result=await api('/api/outlook/refresh',{method:'POST',body:'{}'});toast(result.alreadyRunning?'已有刷新正在进行':'已开始刷新邮件');await loadMailStatus();}
+ try{const result=await api('/api/mail/refresh',{method:'POST',body:'{}'});toast(result.alreadyRunning?'已有刷新正在进行':'已开始刷新邮件');await loadMailStatus();}
  catch(e){toast(e.message);if(button?.isConnected)button.disabled=false;}
 }
 async function toggleMailSchedule(){
  if(!mailStatus)return;
- try{mailStatus=await api('/api/outlook/schedule',{method:'PUT',body:JSON.stringify({enabled:!mailStatus.enabled})});renderMailStatus();toast(mailStatus.enabled?'已开启每小时刷新':'已暂停自动刷新');}
+ try{mailStatus=await api('/api/mail/schedule',{method:'PUT',body:JSON.stringify({enabled:!mailStatus.enabled})});renderMailStatus();toast(mailStatus.enabled?'已开启每小时刷新':'已暂停自动刷新');}
  catch(e){toast(e.message);}
 }
 let mailStatusTicks=0;
@@ -638,20 +639,20 @@ async function refreshItemContext(){
 setInterval(()=>{if(!document.hidden&&state.openId)loadItemContextStatus();},2000);
 // API credentials are write-only in the browser and never enter the shared project model.
 async function openAiSettings(){
- openModal('本地 API 设置','<p id="aiSettingsLoading">正在读取配置…</p>');
+ openModal('模型 API 设置','<p id="aiSettingsLoading">正在读取配置…</p>');
  try{
   const config=await api('/api/ai/config');
   if(!document.getElementById('aiSettingsLoading'))return;
-  openModal('本地 API 设置',`<p>让看板使用这台 Mac 上的模型代理。手机和其他电脑也通过看板使用同一配置。</p>
+  openModal('模型 API 设置',`<p>填写自己的 OpenAI 兼容 API 地址、密钥和模型。支持 HTTPS 服务和本机代理。</p>
   <form id="aiSettingsForm" autocomplete="off">
    <label for="aiBaseUrl">API 地址</label><input class="lan-input" id="aiBaseUrl" type="url" value="${htmlEsc(config.baseUrl)}" required>
-   <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写代理 API Keys 中的密钥'}">
+   <label for="aiApiKey">API 密钥 ${config.keyConfigured?'· 已保存，留空保留':''}</label><input class="lan-input" id="aiApiKey" type="password" autocomplete="new-password" placeholder="${config.keyConfigured?'留空保留现有密钥':'填写自己的 API 密钥'}">
    <label for="aiModel">模型</label><input class="lan-input" id="aiModel" list="aiModelList" value="${htmlEsc(config.model)}" placeholder="点击加载模型，或输入模型名"><datalist id="aiModelList"></datalist>
-   <p>密钥只保存在 Mac 后端。请输入 API 密钥；管理页面的登录密码不能用于模型调用。</p>
+   <p>密钥只保存在自己的部署设备中。请输入 API 密钥；管理页面的登录密码不能用于模型调用。</p>
    <div class="lan-actions"><button class="btn" type="button" data-lan-action="ai-models">加载模型</button><button class="btn primary" type="submit">保存配置</button><button class="btn" type="button" data-lan-action="ai-test">保存并测试连接</button><button class="btn" type="button" data-lan-action="open-ai">打开 AI 助手</button></div>
    <p>测试连接会调用模型一次，不附带项目数据。</p><div id="aiSettingsStatus" class="lan-note" role="status">${config.configured?'已配置 '+htmlEsc(config.model)+'；可测试连接。':'填写配置后保存。'}</div>
   </form>`);
- }catch(e){if(document.getElementById('aiSettingsLoading'))openModal('本地 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
+ }catch(e){if(document.getElementById('aiSettingsLoading'))openModal('模型 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
 }
 function aiSettingsStatus(message){const el=document.getElementById('aiSettingsStatus');if(el)el.textContent=message}
 function lockAiSettings(busy){document.querySelectorAll('#aiSettingsForm button').forEach(el=>el.disabled=busy)}
@@ -664,7 +665,7 @@ async function saveAiSettings(){
 async function runAiSettings(action){
  lockAiSettings(true);aiSettingsStatus(action==='test'?'正在测试模型连接…':'正在保存配置…');
  try{
-  const config=await saveAiSettings();
+  const config=await saveAiSettings();await loadSetupStatus();
   if(action==='models'){
    aiSettingsStatus('正在读取可用模型…');const data=await api('/api/ai/models');
    const list=document.getElementById('aiModelList');if(list)list.innerHTML=data.models.map(name=>`<option value="${htmlEsc(name)}"></option>`).join('');
@@ -720,6 +721,7 @@ async function sendAiMessage(){
  }
 }
 document.addEventListener('submit',async e=>{
+ if(e.target.id==='mailSettingsForm'){e.preventDefault();await saveMailSettings()}
  if(e.target.id==='aiSettingsForm'){e.preventDefault();await runAiSettings('save')}
  if(e.target.id==='aiChatForm'){e.preventDefault();await sendAiMessage()}
 });
@@ -730,6 +732,8 @@ document.addEventListener('click',async e=>{
  switch(a.dataset.lanAction){
  case 'item-context-refresh':await refreshItemContext();break;
  case 'open-ai':await openAi();break;
+ case 'mail-settings':await openMailSettings();break;
+ case 'mail-verify':await verifyMailSettings();break;
  case 'ai-settings':await openAiSettings();break;
  case 'ai-models':await runAiSettings('models');break;
  case 'ai-test':await runAiSettings('test');break;
@@ -746,6 +750,57 @@ document.addEventListener('click',async e=>{
  }
 });
 updateMcpLast();loadMailStatus();connectSocket();
+loadSetupStatus();
+
+async function loadSetupStatus(){
+ try{
+  const [mail, ai] = await Promise.all([api('/api/mail/config'), api('/api/ai/config')]);
+  const ready = mail.verified && mail.shareWithModel && ai.configured;
+  const banner = document.getElementById('setupBanner');
+  if(banner){banner.hidden=ready;banner.querySelector('p').textContent=mail.email?'邮箱 '+mail.email+' · '+(mail.verified?'已验证':'待验证')+' · '+(ai.configured?'模型已配置':'待配置模型'):'连接自己的 Outlook 或 Gmail，再填写 API 和模型。自动刷新默认暂停。';}
+  const status = document.getElementById('accountSetupStatus');
+  if(status)status.textContent=ready?'设置完成 · '+mail.provider+' · '+mail.email+' · '+mail.timeZone:'尚未完成设置，点击下方按钮开始。';
+ }catch(e){toast(e.message)}
+}
+async function openMailSettings(){
+ openModal('邮箱与 API 设置','<p id="mailSettingsLoading">正在读取设置…</p>');
+ try{
+  const [mail, ai] = await Promise.all([api('/api/mail/config'), api('/api/ai/config')]);
+  if(!document.getElementById('mailSettingsLoading'))return;
+  const locked=mail.locked?'disabled':'';
+  openModal('邮箱与 API 设置',`<p>每人自行部署，数据由自己的设备保存。在本机 Codex / ChatGPT 中连接自己的邮箱后，填写同一个邮箱地址。</p>
+  <form id="mailSettingsForm" autocomplete="off">
+   <label for="mailProvider">邮箱服务</label><select class="lan-input" id="mailProvider" ${locked}><option value="outlook" ${mail.provider==='outlook'?'selected':''}>Outlook</option><option value="gmail" ${mail.provider==='gmail'?'selected':''}>Gmail</option></select>
+   <label for="mailEmail">自己的邮箱地址</label><input class="lan-input" id="mailEmail" type="email" required value="${htmlEsc(mail.email)}" placeholder="you@example.com" ${locked}>
+   <label for="mailTimeZone">时区</label><input class="lan-input" id="mailTimeZone" required value="${htmlEsc(mail.email?mail.timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone)}" placeholder="Asia/Shanghai" ${locked}>
+   <label for="mailHistorySince">从哪一天开始整理邮件</label><input class="lan-input" id="mailHistorySince" type="date" required value="${htmlEsc(mail.historySince)}" max="${ndate()}" ${locked}>
+   <details><summary>高级连接设置</summary><label for="mailMcpServer">Codex 中的 MCP server 名称</label><input class="lan-input" id="mailMcpServer" value="${htmlEsc(mail.mcpServer)}" ${locked}><p>默认 codex_apps；其他 server 需提供文档规定的相同工具和返回格式。</p></details>
+   <label class="lan-checkbox"><input id="mailShareWithModel" type="checkbox" ${mail.shareWithModel?'checked':''}>允许把新邮件的部分正文及项目摘要发送至我配置的模型，用于整理看板。</label>
+   <p>${mail.locked?'此数据目录已经绑定邮箱与同步范围。更换账户请使用新的数据目录。':'连接验证只核对邮箱身份，不读取邮件、不调用模型。'}</p>
+   <div class="lan-actions"><button class="btn primary" type="submit">保存邮箱设置</button><button class="btn" type="button" data-lan-action="mail-verify">保存并验证邮箱</button><button class="btn" type="button" data-lan-action="ai-settings">配置自己的 API / 模型</button></div>
+   <div class="lan-note" id="mailSettingsStatus" role="status">${mail.verified?'邮箱身份已验证':'请保存设置并验证邮箱'} · ${ai.configured?'模型已配置':'模型尚未配置'}。保存邮箱设置后，自动刷新会暂停。</div>
+  </form>`);
+ }catch(e){openModal('邮箱与 API 设置',`<p>${htmlEsc(e.message)}</p>`)}
+}
+async function saveMailSettings(){
+ const form=document.getElementById('mailSettingsForm');if(!form)return false;
+ const message=form.querySelector('#mailSettingsStatus');
+ try{
+  await api('/api/mail/config',{method:'PUT',body:JSON.stringify({provider:form.querySelector('#mailProvider').value,email:form.querySelector('#mailEmail').value,timeZone:form.querySelector('#mailTimeZone').value,historySince:form.querySelector('#mailHistorySince').value,mcpServer:form.querySelector('#mailMcpServer').value,shareWithModel:form.querySelector('#mailShareWithModel').checked})});
+  message.textContent='邮箱设置已保存；自动刷新已暂停。';await loadSetupStatus();await refreshFromServer(true);return true;
+ }catch(e){message.textContent=e.message;return false;}
+}
+async function verifyMailSettings(){
+ const form=document.getElementById('mailSettingsForm');if(!form)return;
+ form.querySelectorAll('button').forEach(b=>b.disabled=true);
+ try{
+  if(!await saveMailSettings())return;
+  const message=document.getElementById('mailSettingsStatus');message.textContent='正在核对邮箱身份…';
+  const result=await api('/api/mail/verify',{method:'POST',body:'{}'});
+  message.textContent='已验证自己的邮箱：'+result.email+'。配置模型后可立即刷新或开启每小时刷新。';await loadSetupStatus();
+ }catch(e){const message=document.getElementById('mailSettingsStatus');if(message)message.textContent=e.message;}
+ finally{if(form.isConnected)form.querySelectorAll('button').forEach(b=>b.disabled=false);}
+}
 
 </script>
 </body></html>

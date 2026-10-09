@@ -1,9 +1,10 @@
 import getpass, secrets, hashlib, json, os
 from pathlib import Path
-root=Path(__file__).resolve().parent/'data';root.mkdir(exist_ok=True)
+from runtime_settings import DATA
+root=DATA;root.mkdir(parents=True, exist_ok=True)
 p=root/'auth.json'
 if p.exists():
-    print('访问密码已经配置。要更改密码，请先停服，然后删除 data/auth.json 并重新运行本工具。')
+    print('访问密码已经配置。要更改密码，请先停服，然后删除数据目录下的 auth.json 并重新运行本工具。')
     raise SystemExit(0)
 while True:
     pw=getpass.getpass('请创建 Dashboard 访问密码（至少 12 位）：')

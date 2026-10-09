@@ -1,6 +1,5 @@
 # Private runtime data never belongs in Git
-data/*
-!data/seed.json
+data/
 .env
 .env.*
 !.env.example

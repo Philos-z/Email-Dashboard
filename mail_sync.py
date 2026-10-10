@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta, timezone
 import hashlib
 from html.parser import HTMLParser
 import json
+import logging
 import re
 import time
 from uuid import uuid4
@@ -16,6 +17,7 @@ import ai_proxy
 import outlook_mcp
 
 INTERVAL = 3600
+SCHEDULER_POLL_SECONDS = 5
 MAX_MESSAGES = 100
 LOCAL_ZONE = ZoneInfo('Europe/Berlin')
 QUIET_END_HOUR = 6
@@ -236,6 +238,8 @@ class MailSyncService:
         self.host = host
         self.tasks = set()
         self.scheduler = None
+        self.scheduler_last_tick = None
+        self.scheduler_error = None
         with host.DB_LOCK, host.connect() as con:
             con.execute('CREATE TABLE IF NOT EXISTS mail_sync_config (id INTEGER PRIMARY KEY CHECK(id=1), enabled INTEGER NOT NULL, next_run_at TEXT NOT NULL, cursor TEXT)')
             con.execute('INSERT OR IGNORE INTO mail_sync_config(id,enabled,next_run_at) VALUES(1,0,?)', (next_hour(),))
@@ -264,6 +268,9 @@ class MailSyncService:
                 'nextRunAt': config['next_run_at'] if config['enabled'] else None,
                 'checkedThrough': config['cursor'], 'lastSuccessAt': last_success['finished_at'] if last_success else None,
                 'running': any(run['status'] == 'running' for run in runs), 'runs': runs,
+                'schedulerHealthy': bool(self.scheduler and not self.scheduler.done() and not self.scheduler_error),
+                'schedulerLastTickAt': self.scheduler_last_tick,
+                'schedulerError': self.scheduler_error,
                 'scope': ['收件箱（含子文件夹）', 'Archive / 存档 / 归档（含子文件夹）', '已发送邮件（含子文件夹）'],
                 'folders': folders,
                 'historySince': config['history_since'] or snapshot.get('windowStart') or snapshot.get('snapshotDate'),
@@ -278,7 +285,8 @@ class MailSyncService:
         return self.status()
 
     async def start(self):
-        self.scheduler = asyncio.create_task(self.schedule_loop())
+        if self.scheduler is None or self.scheduler.done():
+            self.scheduler = asyncio.create_task(self.schedule_loop())
 
     async def stop(self):
         tasks = [*self.tasks, *([self.scheduler] if self.scheduler else [])]
@@ -288,12 +296,22 @@ class MailSyncService:
 
     async def schedule_loop(self):
         while True:
-            with self.host.DB_LOCK, self.host.connect() as con:
-                row = con.execute('SELECT enabled,next_run_at FROM mail_sync_config WHERE id=1').fetchone()
-                due = row['enabled'] and parse_date(row['next_run_at']) <= utcnow()
-            if due:
-                self.trigger('hourly')
-            await asyncio.sleep(5)
+            try:
+                with self.host.DB_LOCK, self.host.connect() as con:
+                    row = con.execute('SELECT enabled,next_run_at FROM mail_sync_config WHERE id=1').fetchone()
+                    due = row['enabled'] and parse_date(row['next_run_at']) <= utcnow()
+                if due:
+                    self.trigger('hourly')
+                self.scheduler_last_tick = stamp()
+                if self.scheduler_error:
+                    logging.info('Outlook hourly scheduler recovered')
+                self.scheduler_error = None
+            except Exception:
+                # A transient DB/trigger failure must not permanently kill scheduling.
+                if not self.scheduler_error:
+                    logging.exception('Outlook hourly scheduler tick failed; retrying')
+                self.scheduler_error = '自动刷新调度暂时失败，后台正在重试'
+            await asyncio.sleep(SCHEDULER_POLL_SECONDS)
 
     def trigger(self, reason='manual'):
         host = self.host

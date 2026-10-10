@@ -4,10 +4,14 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 import json
+import logging
 import os
 from pathlib import Path
 import shutil
 import signal
+import time
+
+RPC_TIMEOUT_SECONDS = 60
 
 
 class OutlookError(RuntimeError):
@@ -74,7 +78,18 @@ class OutlookMCP:
         number = self.sequence
         self.process.stdin.write((json.dumps({'id': number, 'method': method, 'params': params}) + '\n').encode())
         await self.process.stdin.drain()
-        return await asyncio.wait_for(self.receive(number), 60)
+        started = time.monotonic()
+        operation = params.get('tool', method)
+        try:
+            return await asyncio.wait_for(self.receive(number), RPC_TIMEOUT_SECONDS)
+        except asyncio.TimeoutError as exc:
+            # Log operation/timing only; never mailbox contents, IDs, or credentials.
+            logging.warning('Outlook MCP timeout: operation=%s elapsed=%.1fs', operation, time.monotonic() - started)
+            stage = {'initialize': '启动客户端', 'thread/start': '初始化工具连接',
+                     'microsoft_outlook_email.get_profile': '验证邮箱连接',
+                     'microsoft_outlook_email.list_mail_folders': '读取文件夹',
+                     'microsoft_outlook_email.list_messages': '读取邮件'}.get(operation, '查询')
+            raise OutlookError(f'Outlook MCP {stage}超时（{RPC_TIMEOUT_SECONDS} 秒），请稍后重试') from exc
 
     async def receive(self, number):
         while True:

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime
 import json
+import logging
 import re
 import time
 from zoneinfo import ZoneInfo
@@ -118,7 +119,13 @@ class ItemContextService:
 
     async def loop(self):
         while True:
-            if not await self.process_next():
+            try:
+                processed = await self.process_next()
+            except Exception:
+                logging.exception('Item context worker failed; retrying')
+                await asyncio.sleep(5)
+                continue
+            if not processed:
                 await asyncio.sleep(.5)
 
     async def process_next(self):

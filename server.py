@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import base64
 from collections import defaultdict, deque
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing, contextmanager
 import hashlib
 import hmac
 import html
@@ -77,12 +77,18 @@ def secret():
     return SESSION_SECRET_PATH.read_bytes()
 
 
+@contextmanager
 def connect():
     conn = sqlite3.connect(DB_PATH, timeout=10)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA busy_timeout=10000")
-    return conn
+    try:
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=10000")
+        # sqlite3's context manager commits/rolls back, but does not close.
+        with conn:
+            yield conn
+    finally:
+        conn.close()
 
 
 def init_db():
@@ -291,7 +297,7 @@ async def export_database(request: Request):
     fd,path=tempfile.mkstemp(prefix="atlas-backup-",suffix=".sqlite3",dir=DATA)
     os.close(fd)
     try:
-        with DB_LOCK, connect() as src, sqlite3.connect(path) as target:
+        with DB_LOCK, connect() as src, closing(sqlite3.connect(path)) as target:
             src.backup(target)
         b=Path(path).read_bytes()
         return Response(content=b,media_type="application/octet-stream",headers={"Content-Disposition":"attachment; filename=progress-atlas.sqlite3"})
